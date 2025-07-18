@@ -44,4 +44,11 @@ public class AuthController {
         tokenService.deleteUser(request);
         return ApiResponse.of(SuccessStatus.USER_DELETE_OK,null);
     }
+
+    @Operation(summary = "사용자 ID 주입 테스트", description = "@AuthUser을 사용한 현사용자 ID 자동 주입 예시입니다.")
+    @GetMapping("test")
+    public ApiResponse<String> loginTest(@AuthUser Long userId){
+        String result = "userID : " + userId;
+        return ApiResponse.onSuccess(result);
+    }
 }
