@@ -24,8 +24,7 @@ public class FcmTokenController {
 
     // TODO : 사용자 토큰 등록 api
 
-    @PostMapping
-    @RequestMapping("/token")
+    @PostMapping("/token")
     public ResponseEntity<?> registerFcmToken(@AuthUser Long userId, @RequestBody FcmTokenRequestDto dto) {
         fcmTokenService.registerFcmToken(userId, dto);
 
