@@ -40,4 +40,8 @@ public class StockData {
 
     @Column(nullable = false)
     private Long tradingVolume;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "stock_id", nullable = false)
+    private Stock stock;
 }

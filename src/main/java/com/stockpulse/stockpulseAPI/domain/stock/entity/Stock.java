@@ -26,8 +26,4 @@ public class Stock extends BaseEntity {
 
     @Column(length = 300)
     private String imageUrl;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stock_id", nullable = false)
-    private Stock stock;
 }
