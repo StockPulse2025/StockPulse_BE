@@ -1,0 +1,87 @@
+package com.stockpulse.stockpulseAPI.notification.service;
+
+import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
+import com.stockpulse.stockpulseAPI.domain.news.entity.News;
+import com.stockpulse.stockpulseAPI.domain.news.entity.NewsImpact;
+import com.stockpulse.stockpulseAPI.domain.news.repository.NewsImpactRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
+import com.stockpulse.stockpulseAPI.domain.notification.entity.NotificationSetting;
+import com.stockpulse.stockpulseAPI.domain.notification.fcm.FcmClient;
+import com.stockpulse.stockpulseAPI.domain.notification.repository.FcmTokenRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.repository.NotificationSettingRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.service.NotificationService;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.UserFavoriteStockRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.Mockito.*;
+
+class NotificationServiceTest {
+
+    private FcmTokenRepository fcmTokenRepository = mock(FcmTokenRepository.class);
+    private FcmClient fcmClient = mock(FcmClient.class);
+    private NotificationSettingRepository notificationSettingRepository = mock(NotificationSettingRepository.class);
+    private UserFavoriteStockRepository userFavoriteStockRepository = mock(UserFavoriteStockRepository.class);
+    private NewsImpactRepository newsImpactRepository = mock(NewsImpactRepository.class);
+    private NotificationService notificationService;
+
+    @BeforeEach
+    void setUp() {
+        notificationService = new NotificationService(
+                fcmTokenRepository,
+                fcmClient,
+                notificationSettingRepository,
+                userFavoriteStockRepository,
+                newsImpactRepository
+        );
+    }
+
+    @Test
+    void testNotification_sendNotificationWhenConditionMet() {
+        // given
+        Stock stock = Stock.builder().id(1L).name("삼성전자").build();
+        News news = News.builder().id(1L).title("삼성전자 급등!").build();
+
+        NewsImpact impact = NewsImpact.builder()
+                .stock(stock)
+                .news(news)
+                .impactRate(BigDecimal.valueOf(3.0)) // 양수: goodNews 케이스
+                .build();
+
+        Member member = Member.builder().id(1L).nickname("핑핑이").build();
+
+        NotificationSetting setting = NotificationSetting.builder()
+                .member(member)
+                .goodNews(true)
+                .badNews(false)
+                .neutralNews(false)
+                .goodSensitivity1(BigDecimal.valueOf(2.0))
+                .badSensitivity1(BigDecimal.valueOf(5.0))
+                .goodSensitivity2(BigDecimal.valueOf(5.0))
+                .badSensitivity2(BigDecimal.valueOf(10.0))
+                .build();
+
+        FcmToken token = FcmToken.builder()
+                .member(member)
+                .fcmToken("fake-fcm-token")
+                .build();
+
+        // mocking repository return values
+        when(userFavoriteStockRepository.findMembersByStock(stock)).thenReturn(Optional.of(List.of(member)));
+        when(notificationSettingRepository.findByMember(member)).thenReturn(Optional.of(setting));
+        when(fcmTokenRepository.findByMember(member)).thenReturn(Optional.of(token));
+        when(newsImpactRepository.findAll()).thenReturn(List.of(impact));
+
+        // when
+        notificationService.notification();
+
+        // then
+        verify(fcmClient, times(1)).sendNotification(eq("fake-fcm-token"), contains("삼성전자"), contains("급등"));
+    }
+}
+
