@@ -2,10 +2,10 @@ package com.stockpulse.stockpulseAPI.domain.member.entity;
 
 import com.stockpulse.stockpulseAPI.domain.common.BaseEntity;
 import com.stockpulse.stockpulseAPI.domain.news.entity.UserScrapNews;
+import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.Notification;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.NotificationSetting;
 import com.stockpulse.stockpulseAPI.domain.post.entity.Post;
-import com.stockpulse.stockpulseAPI.domain.post.entity.Vote;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.UserFavoriteStock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.UserOwnStock;
 import jakarta.persistence.*;
@@ -51,4 +51,7 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserScrapNews> UserScrapNewsList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FcmToken> fcmTokenList = new ArrayList<>();
 }

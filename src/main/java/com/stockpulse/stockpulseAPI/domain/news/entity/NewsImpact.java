@@ -22,7 +22,7 @@ public class NewsImpact extends BaseEntity {
     private Long id;
 
     @Column(precision = 5, scale = 2)
-    private BigDecimal price;
+    private BigDecimal impactRate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "news_id", nullable = false)
