@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface NotificationSettingRepository extends JpaRepository<NotificationSetting, Long> {
     Optional<NotificationSetting> findByMember(Member member);
+
+    Optional<NotificationSetting> findByMemberId(Long memberId);
 }

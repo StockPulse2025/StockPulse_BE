@@ -1,0 +1,52 @@
+package com.stockpulse.stockpulseAPI.notification.service;
+
+import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
+import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.dto.NotificationResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.notification.service.NotificationSettingService;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+@SpringBootTest
+@Transactional
+public class NotificationSettingServiceTest {
+    @Autowired private NotificationSettingService notificationSettingService;
+    @Autowired private MemberRepository memberRepository;
+
+
+    @Test
+    @DisplayName("회원 알림 설정 초기화 및 조회 테스트")
+    void getNotificationSettings() {
+        // given
+        Member member = memberRepository.save(
+                Member.builder()
+                        .nickname("핑핑이")
+                        .email("pingping@example.com") // 요거 추가!
+                        .build()
+        );
+
+        notificationSettingService.initNotificationSetting(member);
+
+
+        // when
+        NotificationResponseDTO.NotificationSettingResponseDTO notificationSettings = notificationSettingService.getNotificationSettings(member.getId());
+
+        // then
+        assertThat(notificationSettings).isNotNull();
+        assertThat(notificationSettings.getOwnStock()).isTrue();
+        assertThat(notificationSettings.getInterestStock()).isTrue();
+        assertThat(notificationSettings.getGoodNews()).isTrue();
+        assertThat(notificationSettings.getBadNews()).isFalse();
+        assertThat(notificationSettings.getGoodSensitivity1()).isEqualByComparingTo(BigDecimal.valueOf(2.0));
+        assertThat(notificationSettings.getBadSensitivity1()).isEqualByComparingTo(BigDecimal.valueOf(5.0));
+        assertThat(notificationSettings.getGoodSensitivity2()).isEqualByComparingTo(BigDecimal.valueOf(5.0));
+        assertThat(notificationSettings.getBadSensitivity2()).isEqualByComparingTo(BigDecimal.valueOf(10.0));
+    }
+}
