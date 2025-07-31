@@ -27,16 +27,19 @@ public class News extends BaseEntity {
     @Column(length = 300)
     private String image;
 
-    @Column(nullable = false, length = 300)
+    @Column(nullable = false, length = 300, unique = true)
     private String url;
 
+    @Column(length = 2048)
+    private String content;
+
     @Column(nullable = false)
-    private String publisher;
+    private String press;
 
     @Column(nullable = false)
     private LocalDateTime publishedDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Category category;
+    private Category category; // 제거
 }

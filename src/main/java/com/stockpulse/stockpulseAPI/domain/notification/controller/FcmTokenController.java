@@ -16,7 +16,7 @@ import static org.springframework.web.servlet.function.ServerResponse.ok;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/fcm")
+@RequestMapping("/api/v1/fcm")
 public class FcmTokenController {
 
     // TODO : service 클래스
