@@ -3,9 +3,9 @@ package com.stockpulse.stockpulseAPI.notification.service;
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
-import com.stockpulse.stockpulseAPI.domain.news.entity.NewsImpact;
+import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
 import com.stockpulse.stockpulseAPI.domain.news.enums.Category;
-import com.stockpulse.stockpulseAPI.domain.news.repository.NewsImpactRepository;
+import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.NotificationSetting;
@@ -36,7 +36,7 @@ public class NotificationIntegrationTest {
     @Autowired private MemberRepository memberRepository;
     @Autowired private StockRepository stockRepository;
     @Autowired private NewsRepository newsRepository;
-    @Autowired private NewsImpactRepository newsImpactRepository;
+    @Autowired private ImpactRepository impactRepository;
     @Autowired private NotificationSettingRepository notificationSettingRepository;
     @Autowired private FcmTokenRepository fcmTokenRepository;
     @Autowired private UserFavoriteStockRepository userFavoriteStockRepository;
@@ -69,8 +69,8 @@ public class NotificationIntegrationTest {
                         .category(Category.SEMICONDUCTOR_DISPLAY)
                         .build());
 
-        NewsImpact newsImpact = newsImpactRepository.save(
-                NewsImpact.builder()
+        Impact impact = impactRepository.save(
+                Impact.builder()
                         .stock(stock)
                         .news(news)
                         .impactRate(BigDecimal.valueOf(3.0)) // 양수

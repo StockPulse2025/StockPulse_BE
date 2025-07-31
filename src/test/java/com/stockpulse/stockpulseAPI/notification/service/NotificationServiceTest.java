@@ -2,8 +2,8 @@ package com.stockpulse.stockpulseAPI.notification.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
-import com.stockpulse.stockpulseAPI.domain.news.entity.NewsImpact;
-import com.stockpulse.stockpulseAPI.domain.news.repository.NewsImpactRepository;
+import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
+import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.NotificationSetting;
 import com.stockpulse.stockpulseAPI.domain.notification.fcm.FcmClient;
@@ -27,7 +27,7 @@ class NotificationServiceTest {
     private FcmClient fcmClient = mock(FcmClient.class);
     private NotificationSettingRepository notificationSettingRepository = mock(NotificationSettingRepository.class);
     private UserFavoriteStockRepository userFavoriteStockRepository = mock(UserFavoriteStockRepository.class);
-    private NewsImpactRepository newsImpactRepository = mock(NewsImpactRepository.class);
+    private ImpactRepository impactRepository = mock(ImpactRepository.class);
     private NotificationService notificationService;
 
     @BeforeEach
@@ -37,7 +37,7 @@ class NotificationServiceTest {
                 fcmClient,
                 notificationSettingRepository,
                 userFavoriteStockRepository,
-                newsImpactRepository
+                impactRepository
         );
     }
 
@@ -47,7 +47,7 @@ class NotificationServiceTest {
         Stock stock = Stock.builder().id(1L).name("삼성전자").build();
         News news = News.builder().id(1L).title("삼성전자 급등!").build();
 
-        NewsImpact impact = NewsImpact.builder()
+        Impact impact = Impact.builder()
                 .stock(stock)
                 .news(news)
                 .impactRate(BigDecimal.valueOf(3.0)) // 양수: goodNews 케이스
@@ -75,7 +75,7 @@ class NotificationServiceTest {
         when(userFavoriteStockRepository.findMembersByStock(stock)).thenReturn(Optional.of(List.of(member)));
         when(notificationSettingRepository.findByMember(member)).thenReturn(Optional.of(setting));
         when(fcmTokenRepository.findByMember(member)).thenReturn(Optional.of(token));
-        when(newsImpactRepository.findAll()).thenReturn(List.of(impact));
+        when(impactRepository.findAll()).thenReturn(List.of(impact));
 
         // when
         notificationService.notification();
