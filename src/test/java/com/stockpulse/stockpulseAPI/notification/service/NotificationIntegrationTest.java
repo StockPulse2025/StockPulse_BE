@@ -4,7 +4,7 @@ import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
-import com.stockpulse.stockpulseAPI.domain.news.enums.Category;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.enums.Category;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
