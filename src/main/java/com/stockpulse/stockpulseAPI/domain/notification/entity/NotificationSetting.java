@@ -3,15 +3,13 @@ package com.stockpulse.stockpulseAPI.domain.notification.entity;
 import com.stockpulse.stockpulseAPI.domain.common.BaseEntity;
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
