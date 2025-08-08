@@ -7,9 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @Builder
@@ -29,7 +26,4 @@ public class Stock extends BaseEntity {
 
     @Column(length = 300)
     private String imageUrl;
-
-    @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StockCategory> stockCategories;
 }

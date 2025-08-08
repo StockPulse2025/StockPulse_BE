@@ -5,10 +5,7 @@ import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
-import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
-import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
-import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.StockHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +48,7 @@ public class NewsCommandService {
                 Impact newImpact = Impact.builder()
                         .stock(stock)
                         .news(news)
+                        .reason(data.getReason())
                         .impactRate(data.getInfluenceScore())
                         .build();
                 impacts.add(newImpact);

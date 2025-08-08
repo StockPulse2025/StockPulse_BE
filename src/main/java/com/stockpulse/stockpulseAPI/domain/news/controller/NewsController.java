@@ -25,7 +25,8 @@ public class NewsController {
     """
     )
     @PostMapping("/pipeline")
-    public ApiResponse<String> ingestNewsImpactAndNewsData(newsRequestDTO.NewsDataPostRequestDTO request) {
+    public ApiResponse<String> ingestNewsImpactAndNewsData(
+            @RequestBody newsRequestDTO.NewsDataPostRequestDTO request) {
         newsCommandService.acceptDataFromPipeline(request);
         return ApiResponse.onSuccess("data added successfully");
     }
