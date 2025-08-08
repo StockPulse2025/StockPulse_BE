@@ -1,5 +1,6 @@
-package com.stockpulse.stockpulseAPI.domain.news.enums;
+package com.stockpulse.stockpulseAPI.domain.stock.entity.enums;
 
+// TODO : 카테고리 로직 변경으로 삭제 예정
 public enum Category {
     SEMICONDUCTOR_DISPLAY("반도체디스플레이"),
     SECOND_BATTERY_EV("2차전지전기차"),

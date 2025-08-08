@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StockData {
+public class StockTick {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +40,10 @@ public class StockData {
 
     @Column(nullable = false)
     private Long tradingVolume;
+
+    private BigDecimal changeAmount;
+
+    private BigDecimal changeRate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id", nullable = false)

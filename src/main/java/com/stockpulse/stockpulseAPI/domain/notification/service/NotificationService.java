@@ -1,9 +1,8 @@
 package com.stockpulse.stockpulseAPI.domain.notification.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
-import com.stockpulse.stockpulseAPI.domain.news.entity.News;
-import com.stockpulse.stockpulseAPI.domain.news.entity.NewsImpact;
-import com.stockpulse.stockpulseAPI.domain.news.repository.NewsImpactRepository;
+import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
+import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.NotificationSetting;
 import com.stockpulse.stockpulseAPI.domain.notification.fcm.FcmClient;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,7 +23,7 @@ public class NotificationService {
     private final FcmClient fcmClient;
     private final NotificationSettingRepository notificationSettingRepository;
     private final UserFavoriteStockRepository userFavoriteStockRepository;
-    private final NewsImpactRepository newsImpactRepository;
+    private final ImpactRepository impactRepository;
 
 
     public void notification() {
@@ -39,11 +37,11 @@ public class NotificationService {
 
         // 1. 업데이트된 뉴스 영향도 조회
 //        List<NewsImpact> newsImpacts = newsImpactRepository.findRecentlyUpdated(LocalDateTime.now().minusMinutes(10));
-        List<NewsImpact> newsImpacts = newsImpactRepository.findAll();
+        List<Impact> impacts = impactRepository.findAll();
 
-        for (NewsImpact newsImpact : newsImpacts) {
-            Stock stock = newsImpact.getStock();
-            Double impactScore = newsImpact.getImpactRate().doubleValue(); // ex: +5.3, -2.1
+        for (Impact impact : impacts) {
+            Stock stock = impact.getStock();
+            Double impactScore = impact.getImpactRate().doubleValue(); // ex: +5.3, -2.1
 
             // 2. 해당 종목에 관심 있는 사용자 조회
             List<Member> members = userFavoriteStockRepository.findMembersByStock(stock).orElseThrow(() -> new IllegalArgumentException("종목에 관심한 사용자이 존재하지 않습니다."));
@@ -78,13 +76,13 @@ public class NotificationService {
                     String title = new StringBuilder()
                             .append("StockPulse에서 보낸 알림입니다")
                             .append(" - ")
-                            .append(newsImpact.getStock().getName())
+                            .append(impact.getStock().getName())
                             .append("의 오늘 등락률")
                             .append(impactScore > 0 ? "(긍정신호)" : "(부정신호)")
                             .toString();
 
                     String body = new StringBuilder()
-                            .append(newsImpact.getNews().getTitle())
+                            .append(impact.getNews().getTitle())
                             .toString();
 
                     fcmClient.sendNotification(fcmToken.getFcmToken(), title, body); // TODO: 구현 필요
