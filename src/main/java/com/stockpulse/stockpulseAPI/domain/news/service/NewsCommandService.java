@@ -1,6 +1,6 @@
 package com.stockpulse.stockpulseAPI.domain.news.service;
 
-import com.stockpulse.stockpulseAPI.domain.news.dto.newsRequestDTO;
+import com.stockpulse.stockpulseAPI.domain.news.dto.NewsRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
@@ -22,7 +22,7 @@ public class NewsCommandService {
     private final StockRepository stockRepository;
 
     @Transactional
-    public void acceptDataFromPipeline(newsRequestDTO.NewsDataPostRequestDTO request) {
+    public void acceptDataFromPipeline(NewsRequestDTO.NewsDataPostRequestDTO request) {
         News news = newsRepository.findByUrl(request.getNewsUrl())
                 .orElse(null);
         if(news == null){
@@ -33,6 +33,7 @@ public class NewsCommandService {
                     .press(request.getPress())
                     .publishedDate(request.getPublishedDate())
                     .content(request.getContent())
+                    .reason(request.getReason())
                     .build();
             newsRepository.save(newNews);
             saveImpactFromNewsData(newNews, request.getRelatedStocks());
@@ -41,14 +42,13 @@ public class NewsCommandService {
         saveImpactFromNewsData(news, request.getRelatedStocks());
     }
 
-    private void saveImpactFromNewsData(News news, List<newsRequestDTO.NewsRelatedStocksDataDTO> request) {
+    private void saveImpactFromNewsData(News news, List<NewsRequestDTO.NewsRelatedStocksDataDTO> request) {
         List<Impact> impacts = new ArrayList<>();
-        for (newsRequestDTO.NewsRelatedStocksDataDTO data : request) {
+        for (NewsRequestDTO.NewsRelatedStocksDataDTO data : request) {
             stockRepository.findBySymbol(data.getSymbol()).ifPresent(stock -> {
                 Impact newImpact = Impact.builder()
                         .stock(stock)
                         .news(news)
-                        .reason(data.getReason())
                         .impactRate(data.getInfluenceScore())
                         .build();
                 impacts.add(newImpact);

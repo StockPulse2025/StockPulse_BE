@@ -1,8 +1,11 @@
 package com.stockpulse.stockpulseAPI.domain.news.controller;
 
-import com.stockpulse.stockpulseAPI.domain.news.dto.newsRequestDTO;
+import com.stockpulse.stockpulseAPI.domain.news.dto.NewsRequestDTO;
+import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.news.service.NewsCommandService;
+import com.stockpulse.stockpulseAPI.domain.news.service.NewsQueryService;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
+import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class NewsController {
 
     private final NewsCommandService newsCommandService;
+    private final NewsQueryService newsQueryService;
 
     @Operation(
             summary = "뉴스 기반 종목 영향 데이터 수신 및 저장",
@@ -26,8 +30,24 @@ public class NewsController {
     )
     @PostMapping("/pipeline")
     public ApiResponse<String> ingestNewsImpactAndNewsData(
-            @RequestBody newsRequestDTO.NewsDataPostRequestDTO request) {
+            @RequestBody NewsRequestDTO.NewsDataPostRequestDTO request) {
         newsCommandService.acceptDataFromPipeline(request);
         return ApiResponse.onSuccess("data added successfully");
+    }
+
+    @Operation(
+            summary = "뉴스 개별 상세 조회",
+            description = """
+    - 뉴스를 개별 상세조회 합니다. 조회하고자 하는 뉴스의 Id를 넘겨주세요
+    - 뉴스 상세 정보(제목, 이미지, 호재/악재 여부 등)과 영향도 순 종목 순위와 정보가 반환됩니다.
+    """
+    )
+    @GetMapping("/{newsId}")
+    public ApiResponse<NewsResponseDTO.NewsDetailResponseDTO> getNewsDetail(
+            @AuthUser Long memberId,
+            @PathVariable("newsId") Long newsId) {
+        NewsResponseDTO.NewsDetailResponseDTO result
+                = newsQueryService.getNewsDetail(newsId,memberId);
+        return ApiResponse.onSuccess(result);
     }
 }
