@@ -44,6 +44,37 @@ public class NewsResponseDTO {
     }
 
     @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NewsOverviewDTO {
+        private Long newsId;
+        private String newsTitle;
+        private String newsImage;
+        private String press;
+        private Sentiment sentiment;
+        private LocalDateTime publishedDate;
+        private Boolean scrapped;
+        private NewsOverviewStockDTO stockInfo;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NewsOverviewStockDTO {
+        private Long stockId;
+        private String stockName;
+        private String stockImage;
+        private BigDecimal currentPrice;
+        private BigDecimal priceChange;
+        private String symbol;
+        private BigDecimal influenceScore;
+    }
+
+    @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder

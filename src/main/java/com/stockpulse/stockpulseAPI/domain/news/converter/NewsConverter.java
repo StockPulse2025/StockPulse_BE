@@ -52,4 +52,30 @@ public class NewsConverter {
                 .isSaved(isSaved)
                 .build();
     }
+
+    public static NewsResponseDTO.NewsOverviewDTO toNewsOverviewDTO(
+            News news, boolean scrapped, Sentiment sentiment, NewsResponseDTO.NewsOverviewStockDTO stockInfo){
+        return NewsResponseDTO.NewsOverviewDTO.builder()
+                .newsId(news.getId())
+                .newsTitle(news.getTitle())
+                .newsImage(news.getImage())
+                .publishedDate(news.getPublishedDate())
+                .press(news.getPress())
+                .sentiment(sentiment)
+                .scrapped(scrapped)
+                .stockInfo(stockInfo)
+                .build();
+    }
+
+    public static NewsResponseDTO.NewsOverviewStockDTO toNewsOverviewStockDTO(Stock stock, Impact impact, BigDecimal currentPrice, BigDecimal priceChange){
+        return NewsResponseDTO.NewsOverviewStockDTO.builder()
+                .stockId(stock.getId())
+                .stockName(stock.getName())
+                .stockImage(stock.getImageUrl())
+                .currentPrice(currentPrice)
+                .priceChange(priceChange)
+                .symbol(stock.getSymbol())
+                .influenceScore(impact.getImpactRate())
+                .build();
+    }
 }

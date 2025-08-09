@@ -65,4 +65,17 @@ public class NewsController {
                 = newsCommandService.toggleNewsScrap(newsId,memberId);
         return ApiResponse.onSuccess(result);
     }
+
+    @Operation(
+            summary = "뉴스룸 메인 뉴스 조회 API",
+            description = """
+    - 뉴스룸 진입시, 제일 메인에 게시되는 뉴스를 조회합니다.
+    - 호출된 날에서 예측 등락폭(뉴스로 인한 주가 영향도 예측치)가장 큰 뉴스를 조회합니다.
+    """
+    )
+    @GetMapping("/main")
+    public ApiResponse<NewsResponseDTO.NewsOverviewDTO> getNewsDetail(@AuthUser Long memberId) {
+        NewsResponseDTO.NewsOverviewDTO result = newsQueryService.getMainNews(memberId);
+        return ApiResponse.onSuccess(result);
+    }
 }

@@ -11,20 +11,25 @@ import com.stockpulse.stockpulseAPI.domain.news.entity.Sentiment;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.MemberScrapNewsRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
 import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.MemberHandler;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.NewsHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static com.stockpulse.stockpulseAPI.domain.news.converter.NewsConverter.toNewsDetailResponseDTO;
-import static com.stockpulse.stockpulseAPI.domain.news.converter.NewsConverter.toNewsDetailStockDTO;
+import static com.stockpulse.stockpulseAPI.domain.news.converter.NewsConverter.*;
 
 @Service
 @RequiredArgsConstructor
@@ -56,10 +61,31 @@ public class NewsQueryService {
             Impact impact = impacts.get(i);
             newsDetailStockDTOS.add(
                     toNewsDetailStockDTO(
-                            impact.getStock(), impact, BigDecimal.valueOf(10.01), BigDecimal.valueOf(10.0), i + 1) // Redis 연동 전 더미
+                            impact.getStock(), impact, BigDecimal.valueOf(10.01), BigDecimal.valueOf(10.0), i + 1) // TODO : Redis 연동 후 수정
             );
         }
         return toNewsDetailResponseDTO(news, newsDetailStockDTOS, isScrapped, sentiment);
+    }
+
+    public NewsResponseDTO.NewsOverviewDTO getMainNews(Long memberId) {
+
+        Pageable topOne = PageRequest.of(0,1);
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+
+        List<Impact> topImpacts
+                = impactRepository.findTopByCreatedAtAfterOrderByImpactRateDescWithNews(todayStart, topOne);
+
+        Impact highestImpact = topImpacts.get(0);
+        Stock highestImpactStock = highestImpact.getStock();
+        News relatedNews = highestImpact.getNews();
+        Sentiment sentiment = determineSentiment(highestImpact);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        boolean scrapped = memberScrapNewsRepository.findByMemberAndNews(member, relatedNews).isPresent();
+
+        NewsResponseDTO.NewsOverviewStockDTO stockInfo = toNewsOverviewStockDTO(highestImpactStock, highestImpact, BigDecimal.valueOf(10.01), BigDecimal.valueOf(10.0)); // TODO : Redis 연동 후 수정
+        return toNewsOverviewDTO(relatedNews, scrapped, sentiment, stockInfo);
     }
 
     private Sentiment determineSentiment(Impact impact) {
