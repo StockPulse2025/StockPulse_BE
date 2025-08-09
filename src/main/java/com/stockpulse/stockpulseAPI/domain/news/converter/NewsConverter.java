@@ -46,4 +46,10 @@ public class NewsConverter {
                 .influenceScore(impact.getImpactRate())
                 .build();
     }
+
+    public static NewsResponseDTO.ScrapResultDTO toScrapNewsResultDTO(boolean isSaved){
+        return NewsResponseDTO.ScrapResultDTO.builder()
+                .isSaved(isSaved)
+                .build();
+    }
 }

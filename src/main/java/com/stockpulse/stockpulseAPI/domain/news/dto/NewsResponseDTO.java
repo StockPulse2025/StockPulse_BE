@@ -42,4 +42,12 @@ public class NewsResponseDTO {
         private String symbol;
         private BigDecimal influenceScore;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ScrapResultDTO {
+        private boolean isSaved;
+    }
 }

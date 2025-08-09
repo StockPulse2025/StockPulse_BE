@@ -14,7 +14,7 @@ import com.stockpulse.stockpulseAPI.domain.notification.repository.FcmTokenRepos
 import com.stockpulse.stockpulseAPI.domain.notification.repository.NotificationSettingRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.service.NotificationService;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
-import com.stockpulse.stockpulseAPI.domain.stock.entity.UserFavoriteStock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberFavoriteStock;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.UserFavoriteStockRepository;
 import org.junit.jupiter.api.Test;
@@ -77,8 +77,8 @@ public class NotificationIntegrationTest {
                         .build()
         );
 
-        UserFavoriteStock  userfavoriteStock = userFavoriteStockRepository.save(
-                UserFavoriteStock.builder()
+        MemberFavoriteStock userfavoriteStock = userFavoriteStockRepository.save(
+                MemberFavoriteStock.builder()
                 .member(member)
                 .stock(stock)
                 .build());

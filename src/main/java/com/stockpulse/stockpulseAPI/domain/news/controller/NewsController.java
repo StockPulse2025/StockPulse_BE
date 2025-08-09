@@ -36,7 +36,7 @@ public class NewsController {
     }
 
     @Operation(
-            summary = "뉴스 개별 상세 조회",
+            summary = "뉴스 개별 상세 조회 API",
             description = """
     - 뉴스를 개별 상세조회 합니다. 조회하고자 하는 뉴스의 Id를 넘겨주세요
     - 뉴스 상세 정보(제목, 이미지, 호재/악재 여부 등)과 영향도 순 종목 순위와 정보가 반환됩니다.
@@ -48,6 +48,21 @@ public class NewsController {
             @PathVariable("newsId") Long newsId) {
         NewsResponseDTO.NewsDetailResponseDTO result
                 = newsQueryService.getNewsDetail(newsId,memberId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(
+            summary = "뉴스 스크랩 토글 API",
+            description = "특정 뉴스에 대해 사용자의 스크랩을 추가하거나 취소합니다. " +
+                    "해당 뉴스를 스크랩하지 않은 경우 스크랩이 추가되고, 이미 스크랩한 경우 스크랩이 해제됩니다. " +
+                    "토글 후 현재 스크랩 상태를 반환합니다. 스크랩할 뉴스 ID를 전달해주세요."
+    )
+    @PostMapping("/{newsId}/scrap")
+    public ApiResponse<NewsResponseDTO.ScrapResultDTO> toggleScrapNews(
+            @AuthUser Long memberId,
+            @PathVariable("newsId") Long newsId) {
+        NewsResponseDTO.ScrapResultDTO result
+                = newsCommandService.toggleNewsScrap(newsId,memberId);
         return ApiResponse.onSuccess(result);
     }
 }
