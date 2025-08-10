@@ -9,7 +9,7 @@ import com.stockpulse.stockpulseAPI.domain.notification.fcm.FcmClient;
 import com.stockpulse.stockpulseAPI.domain.notification.repository.FcmTokenRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.repository.NotificationSettingRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
-import com.stockpulse.stockpulseAPI.domain.stock.repository.UserFavoriteStockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class NotificationService {
     private final FcmTokenRepository fcmTokenRepository;
     private final FcmClient fcmClient;
     private final NotificationSettingRepository notificationSettingRepository;
-    private final UserFavoriteStockRepository userFavoriteStockRepository;
+    private final MemberFavoriteStockRepository memberFavoriteStockRepository;
     private final ImpactRepository impactRepository;
 
 
@@ -44,7 +44,7 @@ public class NotificationService {
             Double impactScore = impact.getImpactRate().doubleValue(); // ex: +5.3, -2.1
 
             // 2. 해당 종목에 관심 있는 사용자 조회
-            List<Member> members = userFavoriteStockRepository.findMembersByStock(stock).orElseThrow(() -> new IllegalArgumentException("종목에 관심한 사용자이 존재하지 않습니다."));
+            List<Member> members = memberFavoriteStockRepository.findMembersByStock(stock).orElseThrow(() -> new IllegalArgumentException("종목에 관심한 사용자이 존재하지 않습니다."));
             for (Member member : members) {
                 // 3. 사용자의 알림 세팅 조회
                 NotificationSetting setting = notificationSettingRepository.findByMember(member).orElseThrow(() -> new IllegalArgumentException("알림 세팅이 존재하지 않습니다."));

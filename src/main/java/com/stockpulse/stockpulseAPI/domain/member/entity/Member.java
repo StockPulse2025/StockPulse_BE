@@ -1,13 +1,13 @@
 package com.stockpulse.stockpulseAPI.domain.member.entity;
 
 import com.stockpulse.stockpulseAPI.domain.common.BaseEntity;
-import com.stockpulse.stockpulseAPI.domain.news.entity.UserScrapNews;
+import com.stockpulse.stockpulseAPI.domain.news.entity.MemberScrapNews;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.Notification;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.NotificationSetting;
 import com.stockpulse.stockpulseAPI.domain.post.entity.Post;
-import com.stockpulse.stockpulseAPI.domain.stock.entity.UserFavoriteStock;
-import com.stockpulse.stockpulseAPI.domain.stock.entity.UserOwnStock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberFavoriteStock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberOwnStock;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,10 +38,10 @@ public class Member extends BaseEntity {
     private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserFavoriteStock> userFavoriteStockList = new ArrayList<>();
+    private List<MemberFavoriteStock> memberFavoriteStockList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserOwnStock> userOwnStockList = new ArrayList<>();
+    private List<MemberOwnStock> memberOwnStockList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notificationList = new ArrayList<>();
@@ -50,7 +50,7 @@ public class Member extends BaseEntity {
     private NotificationSetting notificationSetting;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserScrapNews> UserScrapNewsList = new ArrayList<>();
+    private List<MemberScrapNews> memberScrapNewsList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FcmToken> fcmTokenList = new ArrayList<>();

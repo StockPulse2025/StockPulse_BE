@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,6 +37,11 @@ public class News extends BaseEntity {
     @Column(nullable = false)
     private String press;
 
+    private String reason;
+
     @Column(nullable = false)
     private LocalDateTime publishedDate;
+
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Impact> impacts = new ArrayList<>();
 }

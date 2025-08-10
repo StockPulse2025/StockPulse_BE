@@ -1,18 +1,16 @@
 package com.stockpulse.stockpulseAPI.domain.news.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class newsRequestDTO {
+public class NewsRequestDTO {
 
     @Getter
     @Setter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class NewsDataPostRequestDTO {
@@ -21,18 +19,19 @@ public class newsRequestDTO {
         private String newsImage;
         private String press;
         private String content;
+        private String reason;
         private LocalDateTime publishedDate;
         private List<NewsRelatedStocksDataDTO> relatedStocks;
     }
 
     @Getter
     @Setter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class NewsRelatedStocksDataDTO{
         private String stockName;
         private String symbol;
         private BigDecimal influenceScore;
-        private String reason;
     }
 }

@@ -14,9 +14,9 @@ import com.stockpulse.stockpulseAPI.domain.notification.repository.FcmTokenRepos
 import com.stockpulse.stockpulseAPI.domain.notification.repository.NotificationSettingRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.service.NotificationService;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
-import com.stockpulse.stockpulseAPI.domain.stock.entity.UserFavoriteStock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberFavoriteStock;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
-import com.stockpulse.stockpulseAPI.domain.stock.repository.UserFavoriteStockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +39,7 @@ public class NotificationIntegrationTest {
     @Autowired private ImpactRepository impactRepository;
     @Autowired private NotificationSettingRepository notificationSettingRepository;
     @Autowired private FcmTokenRepository fcmTokenRepository;
-    @Autowired private UserFavoriteStockRepository userFavoriteStockRepository;
+    @Autowired private MemberFavoriteStockRepository memberFavoriteStockRepository;
 
     // 이건 실제로 외부 호출하지 않게 mock 처리 (알림 발송은 진짜 보내지 않도록!)
     @MockBean
@@ -77,8 +77,8 @@ public class NotificationIntegrationTest {
                         .build()
         );
 
-        UserFavoriteStock  userfavoriteStock = userFavoriteStockRepository.save(
-                UserFavoriteStock.builder()
+        MemberFavoriteStock userfavoriteStock = memberFavoriteStockRepository.save(
+                MemberFavoriteStock.builder()
                 .member(member)
                 .stock(stock)
                 .build());
