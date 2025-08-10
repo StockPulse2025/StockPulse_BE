@@ -11,7 +11,7 @@ import com.stockpulse.stockpulseAPI.domain.notification.repository.FcmTokenRepos
 import com.stockpulse.stockpulseAPI.domain.notification.repository.NotificationSettingRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.service.NotificationService;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
-import com.stockpulse.stockpulseAPI.domain.stock.repository.UserFavoriteStockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +26,7 @@ class NotificationServiceTest {
     private FcmTokenRepository fcmTokenRepository = mock(FcmTokenRepository.class);
     private FcmClient fcmClient = mock(FcmClient.class);
     private NotificationSettingRepository notificationSettingRepository = mock(NotificationSettingRepository.class);
-    private UserFavoriteStockRepository userFavoriteStockRepository = mock(UserFavoriteStockRepository.class);
+    private MemberFavoriteStockRepository memberFavoriteStockRepository = mock(MemberFavoriteStockRepository.class);
     private ImpactRepository impactRepository = mock(ImpactRepository.class);
     private NotificationService notificationService;
 
@@ -36,7 +36,7 @@ class NotificationServiceTest {
                 fcmTokenRepository,
                 fcmClient,
                 notificationSettingRepository,
-                userFavoriteStockRepository,
+                memberFavoriteStockRepository,
                 impactRepository
         );
     }
@@ -72,7 +72,7 @@ class NotificationServiceTest {
                 .build();
 
         // mocking repository return values
-        when(userFavoriteStockRepository.findMembersByStock(stock)).thenReturn(Optional.of(List.of(member)));
+        when(memberFavoriteStockRepository.findMembersByStock(stock)).thenReturn(Optional.of(List.of(member)));
         when(notificationSettingRepository.findByMember(member)).thenReturn(Optional.of(setting));
         when(fcmTokenRepository.findByMember(member)).thenReturn(Optional.of(token));
         when(impactRepository.findAll()).thenReturn(List.of(impact));
