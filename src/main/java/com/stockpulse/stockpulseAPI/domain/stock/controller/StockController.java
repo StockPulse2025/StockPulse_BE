@@ -32,4 +32,18 @@ public class StockController {
         StockResponseDTO.StockFavoriteStatusDTO result = stockCommandService.toggleStockFavorite(stockId,memberId);
         return ApiResponse.onSuccess(result);
     }
+
+    @Operation(
+            summary = "보유 종목 토글 API",
+            description = "특정 종목에 대해 보유 종목 지정을 추가하거나 취소합니다. " +
+                    "해당 종목을 기존에 보유 종목으로 설정하지 않은 경우 보유 종목으로 지정이 추가되고, 이미 되어있는 경우 보유 종목 지정이 취소 됩니다. " +
+                    "토글 후 현재 상태를 반환합니다. 토글할 종목 ID를 전달해주세요."
+    )
+    @PostMapping("/{stockId}/owned")
+    public ApiResponse<StockResponseDTO.StockOwnedStatusDTO> toggleStockOwned(
+            @AuthUser Long memberId,
+            @PathVariable("stockId") Long stockId) {
+        StockResponseDTO.StockOwnedStatusDTO result = stockCommandService.toggleStockOwned(stockId,memberId);
+        return ApiResponse.onSuccess(result);
+    }
 }

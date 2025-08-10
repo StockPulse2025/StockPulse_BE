@@ -5,6 +5,7 @@ import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.MemberScrapNewsRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberFavoriteStock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberOwnStock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberOwnStockRepository;
@@ -43,6 +44,24 @@ public class StockCommandService {
                     .stock(stock)
                     .build());
             return new StockResponseDTO.StockFavoriteStatusDTO(true);
+        }
+    }
+
+    public StockResponseDTO.StockOwnedStatusDTO toggleStockOwned(Long memberId, Long stockId) {
+
+        Member member = findMemberByIdOrThrow(memberId);
+        Stock stock = findStockByIdOrThrow(stockId);
+        Optional<MemberOwnStock> ownedStockOpt = memberOwnStockRepository.findByMemberAndStock(member, stock);
+
+        if(ownedStockOpt.isPresent()) {
+            memberOwnStockRepository.delete(ownedStockOpt.get());
+            return new StockResponseDTO.StockOwnedStatusDTO(false);
+        }else {
+            memberOwnStockRepository.save(MemberOwnStock.builder()
+                    .member(member)
+                    .stock(stock)
+                    .build());
+            return new StockResponseDTO.StockOwnedStatusDTO(true);
         }
     }
 

@@ -14,4 +14,12 @@ public class StockResponseDTO {
     public static class StockFavoriteStatusDTO {
         private boolean isFavorite;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class StockOwnedStatusDTO {
+        private boolean isOwned;
+    }
 }
