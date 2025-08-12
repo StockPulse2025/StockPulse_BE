@@ -24,6 +24,10 @@ public class QPost extends EntityPathBase<Post> {
 
     public final com.stockpulse.stockpulseAPI.domain.common.QBaseEntity _super = new com.stockpulse.stockpulseAPI.domain.common.QBaseEntity(this);
 
+    public final NumberPath<Integer> commentCount = createNumber("commentCount", Integer.class);
+
+    public final ListPath<Comment, QComment> comments = this.<Comment, QComment>createList("comments", Comment.class, QComment.class, PathInits.DIRECT2);
+
     public final StringPath content = createString("content");
 
     //inherited
@@ -33,10 +37,18 @@ public class QPost extends EntityPathBase<Post> {
 
     public final com.stockpulse.stockpulseAPI.domain.member.entity.QMember member;
 
+    public final com.stockpulse.stockpulseAPI.domain.news.entity.QNews news;
+
+    public final com.stockpulse.stockpulseAPI.domain.stock.entity.QStock stock;
+
     public final StringPath title = createString("title");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
+
+    public final QVote vote;
+
+    public final NumberPath<Integer> voteCount = createNumber("voteCount", Integer.class);
 
     public QPost(String variable) {
         this(Post.class, forVariable(variable), INITS);
@@ -57,6 +69,9 @@ public class QPost extends EntityPathBase<Post> {
     public QPost(Class<? extends Post> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.member = inits.isInitialized("member") ? new com.stockpulse.stockpulseAPI.domain.member.entity.QMember(forProperty("member"), inits.get("member")) : null;
+        this.news = inits.isInitialized("news") ? new com.stockpulse.stockpulseAPI.domain.news.entity.QNews(forProperty("news")) : null;
+        this.stock = inits.isInitialized("stock") ? new com.stockpulse.stockpulseAPI.domain.stock.entity.QStock(forProperty("stock")) : null;
+        this.vote = inits.isInitialized("vote") ? new QVote(forProperty("vote"), inits.get("vote")) : null;
     }
 
 }
