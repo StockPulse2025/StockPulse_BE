@@ -11,7 +11,3 @@ services:
       - "8080:8080"
     depends_on:
       - redis
-    environment:
-      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
-      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
-      - KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI}
