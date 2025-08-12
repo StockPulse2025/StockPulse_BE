@@ -20,10 +20,12 @@ jobs:
           distribution: 'temurin'
 
       - name: Write Firebase service key file
-        run: |
-          mkdir -p ./src/main/resources/firebase
-          echo "${{ secrets.FIREBASE_SERVICE_KEY }}" > ./src/main/resources/firebase/stockpulse-firebase-service-key.json
-        shell: bash
+        id: create-json
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: "stockpulse-firebase-service-key.json"
+          json: ${{ secrets.FIREBASE_SERVICE_KEY }}
+          dir: 'src/main/resources/firebase/'
 
       - name: Set application.yml
         run: |
