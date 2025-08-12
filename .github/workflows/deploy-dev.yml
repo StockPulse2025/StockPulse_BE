@@ -19,6 +19,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Create Firebase directory
+        run: mkdir -p src/main/resources/firebase
+
       - name: Write Firebase service key file
         id: create-json
         uses: jsdaniell/create-json@v1.2.2
