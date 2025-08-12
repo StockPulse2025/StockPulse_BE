@@ -64,9 +64,8 @@ public class NotificationIntegrationTest {
                 News.builder()
                         .title("삼성전자 급등!")
                         .url("https://www.naver.com")
-                        .publisher("naver")
+                        .press("naver")
                         .publishedDate(LocalDateTime.now())
-                        .category(Category.SEMICONDUCTOR_DISPLAY)
                         .build());
 
         Impact impact = impactRepository.save(
