@@ -24,12 +24,20 @@ public class QVote extends EntityPathBase<Vote> {
 
     public final com.stockpulse.stockpulseAPI.domain.common.QBaseEntity _super = new com.stockpulse.stockpulseAPI.domain.common.QBaseEntity(this);
 
+    public final NumberPath<Long> buy = createNumber("buy", Long.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    public final NumberPath<Long> hold = createNumber("hold", Long.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QPost post;
+
+    public final NumberPath<Long> sell = createNumber("sell", Long.class);
+
+    public final NumberPath<Long> total = createNumber("total", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

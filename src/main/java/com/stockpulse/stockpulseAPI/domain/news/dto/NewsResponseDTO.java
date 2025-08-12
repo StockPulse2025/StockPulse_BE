@@ -81,4 +81,17 @@ public class NewsResponseDTO {
     public static class ScrapResultDTO {
         private boolean isSaved;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PostPrefillDTO {
+        private Long newsId;
+        private String newsTitle;
+        private String press;
+        private String publishedDate;
+        private String imageUrl;
+    }
 }

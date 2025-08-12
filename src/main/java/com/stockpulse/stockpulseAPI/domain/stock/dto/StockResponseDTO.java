@@ -22,4 +22,14 @@ public class StockResponseDTO {
     public static class StockOwnedStatusDTO {
         private boolean isOwned;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class StockSummaryDTO {
+        private String name;
+        private String symbol;
+        private String imageUrl;
+    }
 }

@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -29,6 +30,8 @@ public class QStock extends EntityPathBase<Stock> {
     public final StringPath imageUrl = createString("imageUrl");
 
     public final StringPath name = createString("name");
+
+    public final ListPath<StockCategory, QStockCategory> stockCategories = this.<StockCategory, QStockCategory>createList("stockCategories", StockCategory.class, QStockCategory.class, PathInits.DIRECT2);
 
     public final StringPath symbol = createString("symbol");
 
