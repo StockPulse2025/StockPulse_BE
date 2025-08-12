@@ -19,6 +19,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Write Firebase service key file
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_KEY }}" > ./src/main/resources/firebase/stockpulse-firebase-service-key.json
+        shell: bash
+
       - name: Set application.yml
         run: |
           cd ./src/main/resources
