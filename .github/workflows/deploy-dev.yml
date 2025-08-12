@@ -21,6 +21,7 @@ jobs:
 
       - name: Write Firebase service key file
         run: |
+          mkdir -p ./src/main/resources/firebase
           echo "${{ secrets.FIREBASE_SERVICE_KEY }}" > ./src/main/resources/firebase/stockpulse-firebase-service-key.json
         shell: bash
 
