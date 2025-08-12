@@ -83,7 +83,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/${{ secrets.EC2_USERNAME }}/app/deploy
+            cd /home/${{ secrets.EC2_USERNAME }}/app
             docker compose down --volumes
             docker image prune -f
             SPRING_PROFILES_ACTIVE=dev docker compose up --build -d
