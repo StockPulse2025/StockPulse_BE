@@ -6,15 +6,21 @@ import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
     @PostConstruct
     public void init() throws IOException {
-        FileInputStream serviceAccount =
-                new FileInputStream("src/main/resources/firebase/stockpulse-firebase-service-key.json");
+
+        InputStream serviceAccount = getClass()
+                .getClassLoader()
+                .getResourceAsStream("firebase/stockpulse-firebase-service-key.json");
+
+        if (serviceAccount == null) {
+            throw new RuntimeException("Firebase service key file not found");
+        }
 
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -23,5 +29,7 @@ public class FirebaseConfig {
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
         }
+
+        serviceAccount.close();
     }
 }
