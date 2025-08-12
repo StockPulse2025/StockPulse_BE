@@ -74,6 +74,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "deploy/*"
           target: /home/${{ secrets.EC2_USERNAME }}/app/
+          strip_components: 1
 
       - name: SSH deploy on EC2
         uses: appleboy/ssh-action@master
@@ -82,6 +83,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            cd /home/${{ secrets.EC2_USERNAME }}/app/deploy
             docker compose down --volumes
             docker image prune -f
             SPRING_PROFILES_ACTIVE=dev docker compose up --build -d
