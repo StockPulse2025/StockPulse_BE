@@ -20,10 +20,10 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @RequiredArgsConstructor
 public class KakaoAuthProvider {
-    @Value("${KAKAO_CLIENT_ID}")
+    @Value("${kakao.client-id}")
     private String client;
 
-    @Value("${KAKAO_REDIRECT_URI}")
+    @Value("${kakao.redirect-uri}")
     private String redirect;
 
     // code로 access 토큰 요청하기
