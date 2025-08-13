@@ -10,11 +10,13 @@ import com.stockpulse.stockpulseAPI.domain.news.entity.News;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.MemberScrapNewsRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.service.event.ImpactSavedEvent;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
 import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.MemberHandler;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.NewsHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ public class NewsCommandService {
     private final StockRepository stockRepository;
     private final MemberRepository memberRepository;
     private final MemberScrapNewsRepository memberScrapNewsRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void acceptDataFromPipeline(NewsRequestDTO.NewsDataPostRequestDTO request) {
@@ -51,6 +54,8 @@ public class NewsCommandService {
             return;
         }
         saveImpactFromNewsData(news, request.getRelatedStocks());
+
+
     }
 
     @Transactional
@@ -86,6 +91,8 @@ public class NewsCommandService {
                 impacts.add(newImpact);
             });
         }
-        impactRepository.saveAll(impacts);
+//        impactRepository.saveAll(impacts);
+        List<Impact> savedImpacts = impactRepository.saveAll(impacts);
+        eventPublisher.publishEvent(new ImpactSavedEvent(savedImpacts)); // 이벤트 발행
     }
 }
