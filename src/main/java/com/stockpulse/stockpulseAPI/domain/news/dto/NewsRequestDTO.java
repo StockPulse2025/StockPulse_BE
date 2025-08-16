@@ -13,6 +13,15 @@ public class NewsRequestDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class NewsDataBatchPostRequestDTO {
+        private List<NewsDataPostRequestDTO> newsDataList;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class NewsDataPostRequestDTO {
         private String newsTitle;
         private String newsUrl;
@@ -23,6 +32,7 @@ public class NewsRequestDTO {
         private LocalDateTime publishedDate;
         private List<NewsRelatedStocksDataDTO> relatedStocks;
     }
+
 
     @Getter
     @Setter
