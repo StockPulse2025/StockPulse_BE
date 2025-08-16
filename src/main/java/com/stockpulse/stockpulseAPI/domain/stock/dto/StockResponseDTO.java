@@ -32,4 +32,15 @@ public class StockResponseDTO {
         private String symbol;
         private String imageUrl;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class StockSearchResultDTO{
+        private Long stockId;
+        private String name;
+        private String symbol;
+        private String imageUrl;
+    }
 }
