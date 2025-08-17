@@ -29,6 +29,7 @@ public class StockCommandService {
     private final MemberFavoriteStockRepository memberFavoriteStockRepository;
     private final MemberOwnStockRepository memberOwnStockRepository;
 
+    // 관심 종목 토글
     public StockResponseDTO.StockFavoriteStatusDTO toggleStockFavorite(Long memberId, Long stockId) {
 
         Member member = findMemberByIdOrThrow(memberId);
@@ -47,6 +48,7 @@ public class StockCommandService {
         }
     }
 
+    // 보유 주식 토글
     public StockResponseDTO.StockOwnedStatusDTO toggleStockOwned(Long memberId, Long stockId) {
 
         Member member = findMemberByIdOrThrow(memberId);

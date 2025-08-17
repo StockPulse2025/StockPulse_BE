@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 public class StockResponseDTO {
 
     @Getter
@@ -42,5 +44,23 @@ public class StockResponseDTO {
         private String name;
         private String symbol;
         private String imageUrl;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class StockDetailDTO{
+        private Long stockId;
+        private String name;
+        private String symbol;
+        private String imageUrl;
+
+        private BigDecimal currentPrice;
+        private BigDecimal changeRate;
+        private BigDecimal changeAmount;
+
+        private boolean isFavorite;
+        private boolean isOwned;
     }
 }

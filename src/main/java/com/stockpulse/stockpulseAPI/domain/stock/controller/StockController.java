@@ -1,6 +1,5 @@
 package com.stockpulse.stockpulseAPI.domain.stock.controller;
 
-import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.service.StockCommandService;
 import com.stockpulse.stockpulseAPI.domain.stock.service.StockQueryService;
@@ -58,6 +57,18 @@ public class StockController {
     public ApiResponse<List<StockResponseDTO.StockSearchResultDTO>> searchStocks(
             @RequestParam("keyword") String keyword) {
         List<StockResponseDTO.StockSearchResultDTO> result = stockQueryService.searchStocks(keyword);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(
+            summary = "종목 상세 정보 조회 API",
+            description = "종목 ID로 종목 상세 정보를 조회합니다."
+    )
+    @GetMapping("/{stockId}/detail")
+    public ApiResponse<StockResponseDTO.StockDetailDTO> getStockDetail(
+            @RequestParam("stockId") Long stockId,
+            @AuthUser Long memberId) {
+        StockResponseDTO.StockDetailDTO result = stockQueryService.getStockDetail(stockId, memberId);
         return ApiResponse.onSuccess(result);
     }
 }
