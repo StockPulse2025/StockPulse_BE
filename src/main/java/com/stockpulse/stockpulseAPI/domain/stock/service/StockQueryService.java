@@ -3,6 +3,7 @@ package com.stockpulse.stockpulseAPI.domain.stock.service;
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.StockTick;
@@ -65,6 +66,63 @@ public class StockQueryService {
         return createStockDetailDTO(stock, redisValues, isFavorite, isOwned);
     }
 
+    // 주식 순위
+    public List<StockResponseDTO.StockRankDTO> getStockChart(
+            StockRequestDTO.RealTimeChartType chartType, Long memberId) {
+
+        Member member = getMemberById(memberId);
+        List<Stock> stockList = stockRepository.findAll();
+
+        List<StockResponseDTO.StockRankDTO> resultList = new ArrayList<>();
+
+        for (Stock stock : stockList) {
+            boolean isFavorite = memberFavoriteStockRepository.existsByMemberAndStock(member, stock);
+            boolean isOwned = memberOwnStockRepository.existsByMemberAndStock(member, stock);
+
+            List<String> redisValues = getStockDataFromRedis(stock.getSymbol());
+
+            StockResponseDTO.StockRankDTO dto = createStockRankDTO(
+                    stock, redisValues, isFavorite, isOwned
+            );
+            resultList.add(dto);
+        }
+        
+        sortStocksByChartType(resultList, chartType);
+        
+        return selectTop10WithRanking(resultList);
+    }
+    
+    private void sortStocksByChartType(List<StockResponseDTO.StockRankDTO> stockList, 
+                                      StockRequestDTO.RealTimeChartType chartType) {
+        switch(chartType) {
+            case TRADING_VOLUME:
+                stockList.sort((a, b) -> b.getTradingVolume().compareTo(a.getTradingVolume()));
+                break;
+            case TRADING_VALUE:
+                stockList.sort((a, b) -> b.getTradingValue().compareTo(a.getTradingValue()));
+                break;
+            case TOP_GAINERS:
+                stockList.sort((a, b) -> b.getChangeRate().compareTo(a.getChangeRate()));
+                break;
+            case TOP_LOSERS:
+                stockList.sort((a, b) -> a.getChangeRate().compareTo(b.getChangeRate()));
+                break;
+        }
+    }
+    
+    private List<StockResponseDTO.StockRankDTO> selectTop10WithRanking(
+            List<StockResponseDTO.StockRankDTO> stockList) {
+        List<StockResponseDTO.StockRankDTO> top10List = stockList.stream()
+                .limit(10)
+                .collect(Collectors.toList());
+        
+        for (int i = 0; i < top10List.size(); i++) {
+            top10List.get(i).setRank(i + 1);
+        }
+        
+        return top10List;
+    }
+
     private Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
@@ -79,7 +137,8 @@ public class StockQueryService {
         try {
             String redisKey = "stock:tick:" + stockSymbol;
             HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
-            List<String> fields = Arrays.asList("closePrice", "changeRate", "changeAmount");
+            List<String> fields
+                    = Arrays.asList("closePrice", "changeRate", "changeAmount","tradingValue","tradingValue");
             return hashOps.multiGet(redisKey, fields);
         } catch (Exception e) {
             // Redis 연결 실패, 타임아웃 등 모든 예외 상황에서 null 반환
@@ -99,5 +158,19 @@ public class StockQueryService {
             return StockConverter.toStockDetailDTOFallBack(stock, latestTick.get(), isFavorite, isOwned);
         }
         return StockConverter.toStockDetailDTO(stock, redisValues, isFavorite, isOwned);
+    }
+
+    private StockResponseDTO.StockRankDTO createStockRankDTO(Stock stock, List<String> redisValues,
+                                                                 boolean isFavorite, boolean isOwned) {
+        // Redis 캐시 미스 시 데이터베이스 폴백
+        if (redisValues == null || redisValues.stream().allMatch(Objects::isNull) ||
+                redisValues.stream().anyMatch(value -> value == null || value.trim().isEmpty())) {
+            Optional<StockTick> latestTick = stockTickRepository.findByStock(stock);
+            if (latestTick.isEmpty()) {
+                return StockConverter.toStockRankDTOFault(stock, isFavorite, isOwned);
+            }
+            return StockConverter.toStockRankDTOFallBack(stock, latestTick.get(), isFavorite, isOwned);
+        }
+        return StockConverter.toStockRankDTO(stock, redisValues, isFavorite, isOwned);
     }
 }

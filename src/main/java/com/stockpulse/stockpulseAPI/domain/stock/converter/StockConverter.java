@@ -18,7 +18,8 @@ public class StockConverter {
                 .build();
     }
 
-    public static StockResponseDTO.StockDetailDTO toStockDetailDTO(Stock stock, List<String> values, boolean isFavorite, boolean isOwned) {
+    public static StockResponseDTO.StockDetailDTO toStockDetailDTO(
+            Stock stock, List<String> values, boolean isFavorite, boolean isOwned) {
         return StockResponseDTO.StockDetailDTO.builder()
                 .stockId(stock.getId())
                 .name(stock.getName())
@@ -32,7 +33,8 @@ public class StockConverter {
                 .build();
     }
 
-    public static StockResponseDTO.StockDetailDTO toStockDetailDTOFallBack(Stock stock, StockTick latestTick, boolean isFavorite, boolean isOwned) {
+    public static StockResponseDTO.StockDetailDTO toStockDetailDTOFallBack(
+            Stock stock, StockTick latestTick, boolean isFavorite, boolean isOwned) {
         return StockResponseDTO.StockDetailDTO.builder()
                 .stockId(stock.getId())
                 .name(stock.getName())
@@ -57,6 +59,69 @@ public class StockConverter {
                 .changeAmount(new BigDecimal(0))
                 .isFavorite(isFavorite)
                 .isOwned(isOwned)
+                .build();
+    }
+
+    public static StockResponseDTO.StockRankDTO toStockRankDTO(
+            Stock stock, List<String> values, boolean isFavorite, boolean isOwned) {
+        return StockResponseDTO.StockRankDTO.builder()
+                .rank(0)
+                .stockId(stock.getId())
+                .name(stock.getName())
+                .symbol(stock.getSymbol())
+                .imageUrl(stock.getImageUrl())
+
+                .currentPrice(new BigDecimal(values.get(0)))
+                .changeRate(new BigDecimal(values.get(1)))
+                .changeAmount(new BigDecimal(values.get(2)))
+                .tradingValue(new BigDecimal(values.get(3)))
+                .tradingVolume(new BigDecimal(values.get(4)))
+
+                .isFavorite(isFavorite)
+                .isOwned(isOwned)
+
+                .build();
+    }
+
+    public static StockResponseDTO.StockRankDTO toStockRankDTOFallBack(
+            Stock stock, StockTick latestTick, boolean isFavorite, boolean isOwned) {
+        return StockResponseDTO.StockRankDTO.builder()
+                .rank(0)
+                .stockId(stock.getId())
+                .name(stock.getName())
+                .symbol(stock.getSymbol())
+                .imageUrl(stock.getImageUrl())
+
+                .currentPrice(latestTick.getClosePrice())
+                .changeRate(latestTick.getChangeRate())
+                .changeAmount(latestTick.getChangeAmount())
+                .tradingValue(latestTick.getTradingValue())
+                .tradingVolume(latestTick.getTradingVolume())
+
+                .isFavorite(isFavorite)
+                .isOwned(isOwned)
+
+                .build();
+    }
+
+    public static StockResponseDTO.StockRankDTO toStockRankDTOFault(
+            Stock stock, boolean isFavorite, boolean isOwned) {
+        return StockResponseDTO.StockRankDTO.builder()
+                .rank(0)
+                .stockId(stock.getId())
+                .name(stock.getName())
+                .symbol(stock.getSymbol())
+                .imageUrl(stock.getImageUrl())
+
+                .currentPrice(new BigDecimal(0))
+                .changeRate(new BigDecimal(0))
+                .changeAmount(new BigDecimal(0))
+                .tradingValue(new BigDecimal(0))
+                .tradingVolume(new BigDecimal(0))
+
+                .isFavorite(isFavorite)
+                .isOwned(isOwned)
+
                 .build();
     }
 }

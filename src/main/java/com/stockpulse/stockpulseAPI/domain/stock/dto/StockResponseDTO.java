@@ -1,5 +1,6 @@
 package com.stockpulse.stockpulseAPI.domain.stock.dto;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -59,6 +60,32 @@ public class StockResponseDTO {
         private BigDecimal currentPrice;
         private BigDecimal changeRate;
         private BigDecimal changeAmount;
+
+        private boolean isFavorite;
+        private boolean isOwned;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class StockRankDTO{
+        private Integer rank;
+        
+        public void setRank(Integer rank) {
+            this.rank = rank;
+        }
+
+        private Long stockId;
+        private String name;
+        private String symbol;
+        private String imageUrl;
+
+        private BigDecimal currentPrice;
+        private BigDecimal changeRate;
+        private BigDecimal changeAmount;
+        private BigDecimal tradingValue;
+        private BigDecimal tradingVolume;
 
         private boolean isFavorite;
         private boolean isOwned;

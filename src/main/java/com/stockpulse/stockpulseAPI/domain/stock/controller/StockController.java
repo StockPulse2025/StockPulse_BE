@@ -1,6 +1,7 @@
 package com.stockpulse.stockpulseAPI.domain.stock.controller;
 
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.service.StockCommandService;
 import com.stockpulse.stockpulseAPI.domain.stock.service.StockQueryService;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
@@ -66,9 +67,27 @@ public class StockController {
     )
     @GetMapping("/{stockId}/detail")
     public ApiResponse<StockResponseDTO.StockDetailDTO> getStockDetail(
-            @RequestParam("stockId") Long stockId,
+            @PathVariable("stockId") Long stockId,
             @AuthUser Long memberId) {
         StockResponseDTO.StockDetailDTO result = stockQueryService.getStockDetail(stockId, memberId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(
+            summary = "종목 항목 별 순위 차트 조회 API",
+            description = """
+                    항목 별 종목 순위 차트를 조회합니다.
+                    - TRADING_VOLUME: 거래량 상위 10개 종목
+                    - TRADING_VALUE: 거래대금 상위 10개 종목
+                    - TOP_GAINERS: 상승률 상위 10개 종목
+                    - TOP_LOSERS: 하락률 상위 10개 종목
+                    """
+    )
+    @GetMapping("/chart")
+    public ApiResponse<List<StockResponseDTO.StockRankDTO>> getStockChart(
+            @RequestParam("type") StockRequestDTO.RealTimeChartType chartType,
+            @AuthUser Long memberId) {
+        List<StockResponseDTO.StockRankDTO> result = stockQueryService.getStockChart(chartType, memberId);
         return ApiResponse.onSuccess(result);
     }
 }
