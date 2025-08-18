@@ -29,7 +29,7 @@ public class StockController {
     public ApiResponse<StockResponseDTO.StockFavoriteStatusDTO> toggleStockFavorite(
             @AuthUser Long memberId,
             @PathVariable("stockId") Long stockId) {
-        StockResponseDTO.StockFavoriteStatusDTO result = stockCommandService.toggleStockFavorite(stockId,memberId);
+        StockResponseDTO.StockFavoriteStatusDTO result = stockCommandService.toggleStockFavorite(memberId, stockId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -43,7 +43,7 @@ public class StockController {
     public ApiResponse<StockResponseDTO.StockOwnedStatusDTO> toggleStockOwned(
             @AuthUser Long memberId,
             @PathVariable("stockId") Long stockId) {
-        StockResponseDTO.StockOwnedStatusDTO result = stockCommandService.toggleStockOwned(stockId,memberId);
+        StockResponseDTO.StockOwnedStatusDTO result = stockCommandService.toggleStockOwned(memberId, stockId);
         return ApiResponse.onSuccess(result);
     }
 }

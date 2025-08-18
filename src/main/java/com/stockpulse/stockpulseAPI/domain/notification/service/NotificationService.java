@@ -1,6 +1,7 @@
 package com.stockpulse.stockpulseAPI.domain.notification.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
+import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.NotificationRepository;
@@ -31,8 +32,32 @@ public class NotificationService {
     private final NotificationSettingRepository notificationSettingRepository;
     private final MemberFavoriteStockRepository memberFavoriteStockRepository;
     private final ImpactRepository impactRepository;
+
     private final NotificationRepository notificationRepository;
     private final MemberOwnStockRepository memberOwnStockRepository;
+
+    private final MemberRepository memberRepository;
+
+    public void initNotification(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("Member not found"));
+        boolean exists = notificationSettingRepository.existsByMember(member);
+
+        if(exists) {
+            NotificationSetting notificationSetting = NotificationSetting.builder()
+                    .member(member)
+                    .interestStock(false)
+                    .ownStock(false)
+                    .goodNews(false)
+                    .badNews(false)
+                    .neutralNews(false)
+                    .goodSensitivity1(BigDecimal.valueOf(0.5))
+                    .goodSensitivity2(BigDecimal.valueOf(2.0))
+                    .badSensitivity1(BigDecimal.valueOf(0.5))
+                    .badSensitivity2(BigDecimal.valueOf(2.0))
+                    .build();
+            notificationSettingRepository.save(notificationSetting);
+        }
+    }
 
     // 이벤트 리스너
     @Async

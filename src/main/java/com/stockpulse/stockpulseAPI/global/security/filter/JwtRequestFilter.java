@@ -89,7 +89,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/open-api")
 
                 || path.startsWith("/api/auth/login/")
-                || path.startsWith("/api/v1/news/pipeline")
+                || path.startsWith("/api/v1/news/pipeline/")
                 || path.startsWith("/test")
 
                 // 필요하다면 다른 permitAll 경로들도 추가

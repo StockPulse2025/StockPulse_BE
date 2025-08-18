@@ -37,25 +37,15 @@ public class NewsCommandService {
 
     @Transactional
     public void acceptDataFromPipeline(NewsRequestDTO.NewsDataPostRequestDTO request) {
-        News news = newsRepository.findByUrl(request.getNewsUrl())
-                .orElse(null);
-        if(news == null){
-            News newNews = News.builder()
-                    .title(request.getNewsTitle())
-                    .image(request.getNewsImage())
-                    .url(request.getNewsUrl())
-                    .press(request.getPress())
-                    .publishedDate(request.getPublishedDate())
-                    .content(request.getContent())
-                    .reason(request.getReason())
-                    .build();
-            newsRepository.save(newNews);
-            saveImpactFromNewsData(newNews, request.getRelatedStocks());
-            return;
+        processNewsData(request);
+    }
+
+    @Transactional
+    public void acceptBatchDataFromPipeline(NewsRequestDTO.NewsDataBatchPostRequestDTO request) {
+        for(NewsRequestDTO.NewsDataPostRequestDTO dto : request.getNewsDataList()){
+            processNewsData(dto);
         }
         saveImpactFromNewsData(news, request.getRelatedStocks());
-
-
     }
 
     @Transactional
@@ -77,6 +67,32 @@ public class NewsCommandService {
             memberScrapNewsRepository.save(newsScrapNews);
             return new NewsResponseDTO.ScrapResultDTO(true);
         }
+    }
+
+    private void processNewsData(NewsRequestDTO.NewsDataPostRequestDTO request) {
+        Optional<News> existingNews = newsRepository.findByUrl(request.getNewsUrl());
+        
+        News news;
+        if(existingNews.isEmpty()){
+            news = createNewsFromRequest(request);
+            newsRepository.save(news);
+        } else {
+            news = existingNews.get();
+        }
+        
+        saveImpactFromNewsData(news, request.getRelatedStocks());
+    }
+
+    private News createNewsFromRequest(NewsRequestDTO.NewsDataPostRequestDTO request) {
+        return News.builder()
+                .title(request.getNewsTitle())
+                .image(request.getNewsImage())
+                .url(request.getNewsUrl())
+                .press(request.getPress())
+                .publishedDate(request.getPublishedDate())
+                .content(request.getContent())
+                .reason(request.getReason())
+                .build();
     }
 
     private void saveImpactFromNewsData(News news, List<NewsRequestDTO.NewsRelatedStocksDataDTO> request) {

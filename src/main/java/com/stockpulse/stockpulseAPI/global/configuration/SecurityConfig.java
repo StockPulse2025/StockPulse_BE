@@ -45,7 +45,7 @@ public class SecurityConfig {
             "/api/post/**",
             "/api/recommend/**",
             "/favicon.ico",
-            "/api/v1/news/pipeline"
+            "/api/v1/news/pipeline/**"
     };
 
     private final JwtRequestFilter jwtRequestFilter;
