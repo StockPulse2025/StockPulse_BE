@@ -22,6 +22,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EntityListeners(MemberEntityListener.class)
 public class Member extends BaseEntity {
 
     @Id
