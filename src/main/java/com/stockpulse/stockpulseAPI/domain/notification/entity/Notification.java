@@ -19,8 +19,8 @@ public class Notification extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @Column(nullable = false, length = 50)
-//    private String notificationContent;
+    @Column(nullable = false, length = 50)
+    private String notificationContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "news_id", nullable = false)

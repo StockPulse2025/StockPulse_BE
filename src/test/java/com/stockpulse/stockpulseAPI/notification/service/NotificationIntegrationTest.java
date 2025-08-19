@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -102,7 +101,7 @@ public class NotificationIntegrationTest {
                 .build());
 
         // when
-        notificationService.notification(List.of(impact));
+        notificationService.notification();
 
         // then
         verify(fcmClient, times(1))
