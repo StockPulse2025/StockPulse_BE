@@ -2,6 +2,7 @@ package com.stockpulse.stockpulseAPI.domain.notification.entity;
 
 import com.stockpulse.stockpulseAPI.domain.common.BaseEntity;
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
+import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,8 +24,8 @@ public class Notification extends BaseEntity {
     private String notificationContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "news_id", nullable = false)
-    private News news;
+    @JoinColumn(name = "impact_id", nullable = false)
+    private Impact impact;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
