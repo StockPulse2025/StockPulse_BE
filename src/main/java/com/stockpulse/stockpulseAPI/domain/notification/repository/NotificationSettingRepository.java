@@ -12,5 +12,8 @@ import java.util.Optional;
 public interface NotificationSettingRepository extends JpaRepository<NotificationSetting, Long> {
     Optional<NotificationSetting> findByMember(Member member);
 
+    @Query("SELECT ns FROM NotificationSetting ns WHERE ns.member.id = :memberId")
+    Optional<NotificationSetting> findByMemberId(Long memberId);
+
     boolean existsByMember(Member member);
 }
