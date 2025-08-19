@@ -4,15 +4,22 @@ import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.NotificationRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
+import com.stockpulse.stockpulseAPI.domain.notification.entity.Notification;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.NotificationSetting;
 import com.stockpulse.stockpulseAPI.domain.notification.fcm.FcmClient;
 import com.stockpulse.stockpulseAPI.domain.notification.repository.FcmTokenRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.repository.NotificationSettingRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.service.event.ImpactSavedEvent;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberOwnStockRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,6 +32,10 @@ public class NotificationService {
     private final NotificationSettingRepository notificationSettingRepository;
     private final MemberFavoriteStockRepository memberFavoriteStockRepository;
     private final ImpactRepository impactRepository;
+
+    private final NotificationRepository notificationRepository;
+    private final MemberOwnStockRepository memberOwnStockRepository;
+
     private final MemberRepository memberRepository;
 
     public void initNotification(Long memberId) {
@@ -48,8 +59,15 @@ public class NotificationService {
         }
     }
 
+    // 이벤트 리스너
+    @Async
+    @EventListener
+    @Transactional
+    public void handleImpactSavedEvent(ImpactSavedEvent event) {
+        notification(event.getImpacts());
+    }
 
-    public void notification() {
+    public void notification(List<Impact> impacts) {
         /* TODO
          * 업데이트된 뉴스 영향도 가져오기
          * 영향도로 들어온 종목에 관심 있음을 등록한 사용자들을 찾는다.
@@ -57,18 +75,23 @@ public class NotificationService {
          * 해당 영향도 정보가 +, - 와 절대값을 가지고 사용자들의 알림 필터링 조건을 만족하는 판단.
          * 조건을 만족하는 사용자들의 FCM토큰을 조회 후, FCM 백엔드로 해당 영향도 관련 뉴스 내용 전송
          * */
-
-        // 1. 업데이트된 뉴스 영향도 조회
+//
+//        // 1. 업데이트된 뉴스 영향도 조회
 //        List<NewsImpact> newsImpacts = newsImpactRepository.findRecentlyUpdated(LocalDateTime.now().minusMinutes(10));
-        List<Impact> impacts = impactRepository.findAll();
+//        List<Impact> impacts = impactRepository.findAll();
 
         for (Impact impact : impacts) {
             Stock stock = impact.getStock();
             Double impactScore = impact.getImpactRate().doubleValue(); // ex: +5.3, -2.1
 
             // 2. 해당 종목에 관심 있는 사용자 조회
-            List<Member> members = memberFavoriteStockRepository.findMembersByStock(stock).orElseThrow(() -> new IllegalArgumentException("종목에 관심한 사용자이 존재하지 않습니다."));
-            for (Member member : members) {
+            List<Member> favoriteMembers = memberFavoriteStockRepository.findMembersByStock(stock)
+                    .orElseThrow(() -> new IllegalArgumentException("종목에 관심한 사용자이 존재하지 않습니다."));
+//            // TODO : 해당 종목 보유 사용자 추가
+//            List<Member> owningMembers = memberOwnStockRepository.findMembersByStock(stock)
+//                    .orElseThrow(() -> new IllegalArgumentException("종목에 관심한 사용자이 존재하지 않습니다."));
+
+            for (Member member : favoriteMembers) {
                 // 3. 사용자의 알림 세팅 조회
                 NotificationSetting setting = notificationSettingRepository.findByMember(member).orElseThrow(() -> new IllegalArgumentException("알림 세팅이 존재하지 않습니다."));
 
@@ -92,6 +115,14 @@ public class NotificationService {
                 }
 
                 if (sendNotification) {
+
+                    Notification notificiation = Notification.builder()
+                            .member(member)
+                            .news(impact.getNews())
+                            .build();
+
+                    notificationRepository.save(notificiation);
+
                     // 5. FCM 토큰 조회
                     FcmToken fcmToken = fcmTokenRepository.findByMember(member).orElseThrow(() -> new IllegalArgumentException("토큰이 존재하지 않습니다.")); // TODO: 구현 필요
 

@@ -20,4 +20,6 @@ public interface ImpactRepository extends JpaRepository<Impact, Long> {
 
     @Query("SELECT i FROM Impact i JOIN FETCH i.news WHERE i.createdAt >= :todayStart ORDER BY ABS(i.impactRate) DESC")
     List<Impact> findTopByCreatedAtAfterOrderByImpactRateDescWithNews(@Param("todayStart") LocalDateTime todayStart, Pageable pageable);
+
+
 }
