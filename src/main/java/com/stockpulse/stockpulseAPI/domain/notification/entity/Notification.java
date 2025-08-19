@@ -27,4 +27,9 @@ public class Notification extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    public Notification(Impact impact, Member member) {
+        this.impact = impact;
+        this.member = member;
+    }
 }
