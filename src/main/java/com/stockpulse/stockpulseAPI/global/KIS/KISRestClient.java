@@ -1,4 +1,4 @@
-package com.stockpulse.stockpulseAPI.domain.stock;
+package com.stockpulse.stockpulseAPI.global.KIS;
 
 import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockHistoryResponse;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class KISClient {
+public class KISRestClient {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
