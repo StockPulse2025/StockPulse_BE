@@ -2,6 +2,7 @@ package com.stockpulse.stockpulseAPI.domain.stock.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.KISClient;
 import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
@@ -23,9 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter.toStockDetailDTO;
-import static com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter.toStockDetailDTOFallBack;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -37,6 +35,7 @@ public class StockQueryService {
     private final RedisTemplate<String, String> redisTemplate;
     private final MemberFavoriteStockRepository memberFavoriteStockRepository;
     private final MemberOwnStockRepository memberOwnStockRepository;
+    private final KISClient kisClient;
 
     // 주식 검색
     public List<StockResponseDTO.StockSearchResultDTO> searchStocks(String keyword) {
@@ -91,21 +90,32 @@ public class StockQueryService {
         
         return selectTop10WithRanking(resultList);
     }
+
+    // 기간별 종목 캔들 차트 데이터 조회
+    public StockResponseDTO.StockCandleListDTO getStockCandleData(
+            Long stockId, StockRequestDTO.ChartPeriodType period){
+        Stock stock = getStockById(stockId);
+        return kisClient.getStockCandleListDTO(stock, period);
+    }
     
     private void sortStocksByChartType(List<StockResponseDTO.StockRankDTO> stockList, 
                                       StockRequestDTO.RealTimeChartType chartType) {
         switch(chartType) {
             case TRADING_VOLUME:
-                stockList.sort((a, b) -> b.getTradingVolume().compareTo(a.getTradingVolume()));
+                stockList.sort((a, b)
+                        -> b.getTradingVolume().compareTo(a.getTradingVolume()));
                 break;
             case TRADING_VALUE:
-                stockList.sort((a, b) -> b.getTradingValue().compareTo(a.getTradingValue()));
+                stockList.sort((a, b)
+                        -> b.getTradingValue().compareTo(a.getTradingValue()));
                 break;
             case TOP_GAINERS:
-                stockList.sort((a, b) -> b.getChangeRate().compareTo(a.getChangeRate()));
+                stockList.sort((a, b)
+                        -> b.getChangeRate().compareTo(a.getChangeRate()));
                 break;
             case TOP_LOSERS:
-                stockList.sort((a, b) -> a.getChangeRate().compareTo(b.getChangeRate()));
+                stockList.sort((a, b)
+                        -> a.getChangeRate().compareTo(b.getChangeRate()));
                 break;
         }
     }

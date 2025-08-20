@@ -62,6 +62,25 @@ public class StockController {
     }
 
     @Operation(
+            summary = "기간별 종목 캔들차트 데이터 조회 API",
+            description = """ 
+                    특정 종목의 캔들차트 데이터를 기간별로 조회합니다.
+                    - DAY: 일별 캔들차트
+                    - WEEK: 주별 캔들차트
+                    - MONTH: 월별 캔들차트
+                    - 시가, 종가, 고가, 저가, 거래량 정보를 반환합니다.
+                    """
+    )
+    @GetMapping("/{stockId}/candle")
+    public ApiResponse<StockResponseDTO.StockCandleListDTO> getStockCandle(
+            @PathVariable("stockId") Long stockId,
+            @RequestParam("period") StockRequestDTO.ChartPeriodType period
+    ) {
+        StockResponseDTO.StockCandleListDTO result = stockQueryService.getStockCandleData(stockId, period);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(
             summary = "종목 상세 정보 조회 API",
             description = "종목 ID로 종목 상세 정보를 조회합니다."
     )

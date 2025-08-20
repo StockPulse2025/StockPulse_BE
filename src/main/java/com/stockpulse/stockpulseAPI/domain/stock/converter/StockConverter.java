@@ -1,5 +1,7 @@
 package com.stockpulse.stockpulseAPI.domain.stock.converter;
 
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockHistoryResponse;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.StockTick;
@@ -122,6 +124,32 @@ public class StockConverter {
                 .isFavorite(isFavorite)
                 .isOwned(isOwned)
 
+                .build();
+    }
+
+    public static StockResponseDTO.StockCandleDTO toStockCandleListDTO(
+            StockHistoryResponse.StockHistoryDto dto){
+        return StockResponseDTO.StockCandleDTO.builder()
+                .date(dto.getStckBsopDate())
+                .openPrice(dto.getStckOprc())
+                .highPrice(dto.getStckHgpr())
+                .lowPrice(dto.getStckLwpr())
+                .closePrice(dto.getStckClpr())
+                .totalVolume(dto.getAcmlVol())
+                .build();
+    }
+
+    public static StockResponseDTO.StockCandleListDTO toStockCandleListDTO(
+            Stock stock,
+            StockRequestDTO.ChartPeriodType periodType,
+            List<StockResponseDTO.StockCandleDTO> stockCandleDTOS
+    ){
+        return StockResponseDTO.StockCandleListDTO.builder()
+                .stockId(stock.getId())
+                .stockName(stock.getName())
+                .symbol(stock.getSymbol())
+                .period(periodType)
+                .stockCandleDataList(stockCandleDTOS)
                 .build();
     }
 }

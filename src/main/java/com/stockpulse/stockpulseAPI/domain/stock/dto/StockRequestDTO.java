@@ -8,4 +8,10 @@ public class StockRequestDTO {
         TOP_GAINERS,
         TOP_LOSERS
     }
+    
+    public enum ChartPeriodType {
+        DAY,
+        WEEK,
+        MONTH
+    }
 }

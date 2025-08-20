@@ -1,12 +1,12 @@
 package com.stockpulse.stockpulseAPI.domain.stock.dto;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class StockResponseDTO {
 
@@ -89,5 +89,31 @@ public class StockResponseDTO {
 
         private boolean isFavorite;
         private boolean isOwned;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class StockCandleDTO{
+        private String date;
+
+        private String openPrice;
+        private String highPrice;
+        private String lowPrice;
+        private String closePrice;
+        private String totalVolume;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class StockCandleListDTO{
+        private Long stockId;
+        private String stockName;
+        private String symbol;
+        private StockRequestDTO.ChartPeriodType period;
+        private List<StockCandleDTO> stockCandleDataList;
     }
 }
