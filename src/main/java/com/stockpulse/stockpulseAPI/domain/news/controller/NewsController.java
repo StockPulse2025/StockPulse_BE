@@ -93,7 +93,64 @@ public class NewsController {
     신규 뉴스 및 연관 종목에 대한 영향도 데이터를 저장합니다.
         
     해당 API는 뉴스-종목 영향도 분석 파이프라인 배치 데이터 입력 지점으로 사용됩니다.
-    """
+    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "NewsDataBatchPostRequestDTO",
+                    required = true,
+                    content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = NewsRequestDTO.NewsDataBatchPostRequestDTO.class),
+                        examples = @ExampleObject(value =
+                        """
+                                { "newsDataList":
+                                 [
+                                 {
+                                   "newsTitle": "AI 반도체 호황에 국내 기술주 급등",
+                                   "newsUrl": "https://finance.example.com/news/20250810-ai-semiconductor-boom",
+                                   "newsImage": "https://cdn.example.com/images/ai-chip-2025.jpg",
+                                   "press": "한국경제",
+                                   "content": "전 세계적으로 AI 반도체 수요가 급증하면서 국내 주요 반도체·전자 기업들의 주가가 일제히 상승했다. 업계 전문가들은 메모리 반도체 가격 상승과 AI 서버 수요 확대로 2025년 하반기 실적 개선이 가속화될 것으로 전망하고 있다.",
+                                   "reason": "AI 데이터센터 투자 확대와 반도체 공급 부족 현상이 호재로 작용",
+                                   "publishedDate": "2025-08-10T08:40:31.720Z",
+                                   "relatedStocks": [
+                                     {
+                                       "stockName": "삼성전자",
+                                       "symbol": "005930",
+                                       "influenceScore": 3.2
+                                     },
+                                     {
+                                       "stockName": "SK하이닉스",
+                                       "symbol": "000660",
+                                       "influenceScore": 4.8
+                                     },
+                                     {
+                                       "stockName": "DB하이텍",
+                                       "symbol": "000990",
+                                       "influenceScore": 5.5
+                                     },
+                                     {
+                                       "stockName": "한미반도체",
+                                       "symbol": "042700",
+                                       "influenceScore": 7.1
+                                     },
+                                     {
+                                       "stockName": "네이버",
+                                       "symbol": "035420",
+                                       "influenceScore": 1.4
+                                     },
+                                     {
+                                       "stockName": "카카오",
+                                       "symbol": "035720",
+                                       "influenceScore": -0.8
+                                     }
+                                   ]
+                                 }
+                                 ]
+                                 }
+                        """
+                        )
+                    )
+            )
     )
     @PostMapping("/pipeline/batch")
     public ApiResponse<String> ingestBatchNewsImpactData(
