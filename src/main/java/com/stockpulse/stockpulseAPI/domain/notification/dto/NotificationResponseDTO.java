@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class NotificationResponseDTO {
-    private List<NotificationItemResponseDTO> notificationItems;
+    private List<NotificationItemResponseDTO> notificationItems = new ArrayList<>();
 
     @Getter
     @NoArgsConstructor
