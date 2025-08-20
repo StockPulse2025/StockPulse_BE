@@ -6,8 +6,9 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: my_redis
+      host: localhost
       port: 6379
+      timeout: 1000ms
   jpa:
     hibernate:
       ddl-auto: ${DATABASE_DDL_AUTO:update}
@@ -40,3 +41,9 @@ jwt:
   secret: ${JWT_SECRET_KEY}
   access-token-validity: ${JWT_ACCESS_TOKEN_TIME}
   refresh-token-validity: ${JWT_REFRESH_TOKEN_TIME}
+
+kis:
+  app_key1: ${KIS_APP_KEY_1}
+  app_secret1: ${KIS_SECRET_KEY_1}
+  app_key2: ${KIS_APP_KEY_2}
+  app_secret2: ${KIS_SECRET_KEY_2}

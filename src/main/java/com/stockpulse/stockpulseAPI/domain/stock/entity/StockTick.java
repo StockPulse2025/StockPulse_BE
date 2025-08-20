@@ -36,14 +36,16 @@ public class StockTick {
     private BigDecimal lowPrice;
 
     @Column(nullable = false)
-    private Long tradingValue;
+    private BigDecimal tradingValue; // 거래대금
 
     @Column(nullable = false)
-    private Long tradingVolume;
+    private BigDecimal tradingVolume; // 거래량
 
-    private BigDecimal changeAmount;
+    @Column(nullable = false)
+    private BigDecimal changeAmount; // 전일대비
 
-    private BigDecimal changeRate;
+    @Column(nullable = false)
+    private BigDecimal changeRate; // 전일대비율
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id", nullable = false)

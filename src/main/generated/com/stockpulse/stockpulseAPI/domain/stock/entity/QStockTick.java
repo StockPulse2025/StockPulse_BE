@@ -40,9 +40,9 @@ public class QStockTick extends EntityPathBase<StockTick> {
 
     public final QStock stock;
 
-    public final NumberPath<Long> tradingValue = createNumber("tradingValue", Long.class);
+    public final NumberPath<java.math.BigDecimal> tradingValue = createNumber("tradingValue", java.math.BigDecimal.class);
 
-    public final NumberPath<Long> tradingVolume = createNumber("tradingVolume", Long.class);
+    public final NumberPath<java.math.BigDecimal> tradingVolume = createNumber("tradingVolume", java.math.BigDecimal.class);
 
     public QStockTick(String variable) {
         this(StockTick.class, forVariable(variable), INITS);

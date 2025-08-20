@@ -13,4 +13,6 @@ public interface MemberOwnStockRepository extends JpaRepository<MemberOwnStock, 
 
     @Query("SELECT mos FROM MemberOwnStock mos WHERE mos.member = :member AND mos.stock = :stock")
     Optional<MemberOwnStock> findByMemberAndStock(@Param("member") Member member, @Param("stock") Stock stock);
+    
+    boolean existsByMemberAndStock(Member member, Stock stock);
 }
