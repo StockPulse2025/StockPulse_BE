@@ -2,6 +2,7 @@ package com.stockpulse.stockpulseAPI.domain.notification.entity;
 
 import com.stockpulse.stockpulseAPI.domain.common.BaseEntity;
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
+import com.stockpulse.stockpulseAPI.domain.notification.dto.NotificationSettingRequestDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,4 +52,28 @@ public class NotificationSetting extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    public void updateSettings(NotificationSettingRequestDTO.UpdateDTO request) {
+        this.ownStock = request.getOwnStock();
+        this.interestStock = request.getInterestStock();
+        this.goodNews = request.getGoodNews();
+        this.badNews = request.getBadNews();
+        this.neutralNews = request.getNeutralNews();
+        this.goodSensitivity1 = request.getGoodSensitivity1();
+        this.badSensitivity1 = request.getBadSensitivity1();
+        this.goodSensitivity2 = request.getGoodSensitivity2();
+        this.badSensitivity2 = request.getBadSensitivity2();
+    }
+
+    public void resetSetting() {
+        this.ownStock = false;
+        this.interestStock = false;
+        this.goodNews = false;
+        this.badNews = false;
+        this.neutralNews = false;
+        this.goodSensitivity1 = BigDecimal.valueOf(0.5);
+        this.badSensitivity1 = BigDecimal.valueOf(0.5);
+        this.goodSensitivity2 = BigDecimal.valueOf(2.0);
+        this.badSensitivity2 = BigDecimal.valueOf(2.0);
+    }
 }

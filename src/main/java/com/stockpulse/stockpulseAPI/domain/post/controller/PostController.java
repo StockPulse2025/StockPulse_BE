@@ -24,7 +24,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/post")
+@RequestMapping("/api/v1/post")
 @Tag(name = "Post", description = "게시글 관련 API")
 public class PostController {
 

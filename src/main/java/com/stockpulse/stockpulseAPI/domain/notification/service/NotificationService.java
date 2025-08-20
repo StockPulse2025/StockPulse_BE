@@ -1,20 +1,28 @@
 package com.stockpulse.stockpulseAPI.domain.notification.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
+import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.dto.NotificationResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.notification.dto.NotificationSettingRequestDTO;
+import com.stockpulse.stockpulseAPI.domain.notification.dto.NotificationSettingResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
+import com.stockpulse.stockpulseAPI.domain.notification.entity.Notification;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.NotificationSetting;
 import com.stockpulse.stockpulseAPI.domain.notification.fcm.FcmClient;
 import com.stockpulse.stockpulseAPI.domain.notification.repository.FcmTokenRepository;
+import com.stockpulse.stockpulseAPI.domain.notification.repository.NotificationRepository;
 import com.stockpulse.stockpulseAPI.domain.notification.repository.NotificationSettingRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,10 +30,42 @@ public class NotificationService {
     private final FcmTokenRepository fcmTokenRepository;
     private final FcmClient fcmClient;
     private final NotificationSettingRepository notificationSettingRepository;
+    private final NotificationRepository notificationRepository;
     private final MemberFavoriteStockRepository memberFavoriteStockRepository;
     private final ImpactRepository impactRepository;
+    private final MemberRepository memberRepository;
+
+    public void initNotification(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("Member not found"));
+        boolean exists = notificationSettingRepository.existsByMember(member);
+
+        if(!exists) {
+            NotificationSetting notificationSetting = NotificationSetting.builder()
+                .member(member)
+                .interestStock(false)
+                .ownStock(false)
+                .goodNews(false)
+                .badNews(false)
+                .neutralNews(false)
+                .goodSensitivity1(BigDecimal.valueOf(0.5))
+                .goodSensitivity2(BigDecimal.valueOf(2.0))
+                .badSensitivity1(BigDecimal.valueOf(0.5))
+                .badSensitivity2(BigDecimal.valueOf(2.0))
+                .build();
+        notificationSettingRepository.save(notificationSetting);
+        }
+    }
+
+    @Transactional
+    public void resetNotification(Long memberId) {
+        NotificationSetting notificationSetting = notificationSettingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("알림 세팅이 존재하지 않습니다."));
+
+        notificationSetting.resetSetting();
+    }
 
 
+    @Transactional
     public void notification() {
         /* TODO
          * 업데이트된 뉴스 영향도 가져오기
@@ -69,6 +109,10 @@ public class NotificationService {
                 }
 
                 if (sendNotification) {
+
+                    Notification notification = new Notification(impact, member);
+                    notificationRepository.save(notification);
+
                     // 5. FCM 토큰 조회
                     FcmToken fcmToken = fcmTokenRepository.findByMember(member).orElseThrow(() -> new IllegalArgumentException("토큰이 존재하지 않습니다.")); // TODO: 구현 필요
 
@@ -85,9 +129,38 @@ public class NotificationService {
                             .append(impact.getNews().getTitle())
                             .toString();
 
-                    fcmClient.sendNotification(fcmToken.getFcmToken(), title, body); // TODO: 구현 필요
+                    fcmClient.sendNotification(fcmToken.getFcmToken(), title, body);
                 }
             }
         }
+    }
+
+    public NotificationSettingResponseDTO getNotificationSetting(Long userId) {
+        NotificationSetting notificationSetting = notificationSettingRepository.findByMemberId(userId).orElseThrow(() -> new IllegalArgumentException("알림 세팅이 존재하지 않습니다."));
+        return new NotificationSettingResponseDTO().toResponseDTO(notificationSetting);
+    }
+
+    public NotificationResponseDTO getNotificationHistory(Long userId, String type) {
+        List<Notification> notifications = null;
+        switch (type) {
+            case "interest":
+                notifications = notificationRepository.findFavoriteStockHistoryByMemberId(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("사용자가 관심 종목이 없습니다."));
+                break;
+            case "owned":
+                notifications = notificationRepository.findOwnStockHistoryByMemberId(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("사용자가 보유한 종목이 없습니다."));
+                break;
+            default:
+                throw new IllegalArgumentException("작업 타입이 지정되지 않음");
+        }
+        return new NotificationResponseDTO().toResponseDTO(notifications);
+    }
+
+    @Transactional
+    public void updateNotificationSetting(Long memberId, NotificationSettingRequestDTO.UpdateDTO request) {
+        NotificationSetting setting = notificationSettingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("알림 세팅이 존재하지 않습니다."));
+        setting.updateSettings(request);
     }
 }
