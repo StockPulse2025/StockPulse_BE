@@ -55,4 +55,8 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FcmToken> fcmTokenList = new ArrayList<>();
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }
