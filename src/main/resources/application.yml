@@ -47,3 +47,5 @@ kis:
   app_secret1: ${KIS_SECRET_KEY_1}
   app_key2: ${KIS_APP_KEY_2}
   app_secret2: ${KIS_SECRET_KEY_2}
+  approval_key1: ${KIS_APPROVAL_KEY_1}
+  approval_key2: ${KIS_APPROVAL_KEY_2}
