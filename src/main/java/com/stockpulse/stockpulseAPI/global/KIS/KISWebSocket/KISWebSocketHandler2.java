@@ -1,0 +1,156 @@
+package com.stockpulse.stockpulseAPI.global.KIS.KISWebSocket;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class KISWebSocketHandler2 extends TextWebSocketHandler {
+
+    private static final List<String> STOCK_CODE = List.of(
+            "066570", "323410", "003550", "017670", "018260",
+            "006800", "000150", "272210", "086280", "009150",
+            "003230", "003670", "352820", "267250", "000100",
+            "047810", "010120", "005830", "443060", "003490",
+            "047050", "042700", "090430", "377300", "071050",
+            "010620", "000880", "021240", "000720", "326030",
+            "180640", "010950", "064400", "278470", "005940",
+            "032640", "016360", "029780", "161390", "034220"
+    );
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    @Value("${kis.approval_key2}")
+    private String approvalKey;
+    private String custType = "P";
+    private String trType = "1";
+    private String trId = "H0STCNT0";
+
+
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        log.info("KIS connect : {}", session.getId());
+
+        for (String stockCode : STOCK_CODE) {
+            String requestMessage = buildSubscribeMessage(stockCode);
+            session.sendMessage(new TextMessage(requestMessage));
+            log.info("구독 요청 메시지 전송 ws2 - 종목 코드: {}", stockCode);
+        }
+    }
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        String payload = message.getPayload();
+        if (payload.contains("\"tr_id\":\"PINGPONG\"")) {
+            session.sendMessage(new TextMessage("{\"header\":{\"tr_id\":\"PINGPONG\"}}"));
+            return;
+        }
+
+        if (payload.startsWith("0|H0STCNT0|")) {
+            processTickData(payload);
+        }
+    }
+
+    private static final int EXPECTED_FIELD_COUNT = 46;
+
+    private void processTickData(String rawMessage) {
+        try {
+            String[] parts = rawMessage.split("\\|");
+            if (parts.length < 4) {
+                log.warn("잘못된 체결 메시지: {}", rawMessage);
+                return;
+            }
+
+            int dataCount = Integer.parseInt(parts[2]);
+            String body = parts[3];
+            for (int i = 4; i < parts.length; i++) {
+                body += "^" + parts[i];
+            }
+            String[] fields = body.split("\\^");
+
+            for (int i = 0; i < dataCount; i++) {
+                int startIdx = i * EXPECTED_FIELD_COUNT;
+
+                String MKSC_SHRN_ISCD = fields[startIdx];
+                String STCK_PRPR = fields[startIdx + 2];
+                String PRDY_CTRT = fields[startIdx + 5];
+                String WGHN_AVRG_STCK_PRC = fields[startIdx + 6];
+                String STCK_OPRC = fields[startIdx + 7];
+                String STCK_HGPR = fields[startIdx + 8];
+                String STCK_LWPR = fields[startIdx + 9];
+                String ACML_VOL = fields[startIdx + 13];
+                String ACML_TR_PBMN = fields[startIdx + 14];
+
+                Map<String, Object> updateMap = new HashMap<>();
+                updateMap.put("date", LocalDateTime.now().toString());
+                updateMap.put("openPrice", STCK_OPRC);
+                updateMap.put("highPrice", STCK_HGPR);
+                updateMap.put("lowPrice", STCK_LWPR);
+                updateMap.put("closePrice", STCK_PRPR);
+                updateMap.put("tradingValue", ACML_TR_PBMN);
+                updateMap.put("tradingVolume", ACML_VOL);
+                updateMap.put("changeRate", PRDY_CTRT);
+                updateMap.put("changeAmount", WGHN_AVRG_STCK_PRC);
+
+                String stockKey = "stock:tick:" + MKSC_SHRN_ISCD;
+
+                redisTemplate.opsForHash().putAll(stockKey, updateMap);
+            }
+        } catch (Exception e) {
+            log.error("체결 데이터 파싱 실패", e);
+        }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        int statusCode = status.getCode();
+
+        if (statusCode == CloseStatus.NORMAL.getCode()) {
+            log.info("정상적으로 웹소켓 연결이 종료되었습니다.");
+        } else if (statusCode == CloseStatus.SESSION_NOT_RELIABLE.getCode()) {
+            log.warn("웹소켓 세션이 안정적이지 않아 연결이 종료되었습니다.");
+        } else {
+            log.error("웹소켓 연결이 비정상적으로 종료되었습니다. Status Code: {}, Reason: {}", statusCode, status.getReason());
+        }
+        log.info("KIS 웹소켓 연결 종료 : {}", status.getReason());
+    }
+
+    private String buildSubscribeMessage(String stockCode) {
+        return String.format("""
+            {
+                "header": {
+                    "approval_key": "%s",
+                    "custtype": "%s",
+                    "tr_type": "%s",
+                    "tr_id": "%s",
+                    "tr_key": "%s"
+                },
+                "body": {
+                    "input": {
+                        "tr_id": "%s",
+                        "tr_key": "%s"
+                    }
+                }
+            }
+            """,
+                approvalKey, custType, trType, trId, stockCode,
+                trId, stockCode
+        );
+    }
+}
