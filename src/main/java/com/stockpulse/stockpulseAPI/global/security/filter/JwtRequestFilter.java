@@ -92,6 +92,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/v1/news/pipeline/")
                 || path.startsWith("/test")
 
+                || path.startsWith("/ws-stock/**")
+                || path.startsWith("/ws-stock")
+
                 // 필요하다면 다른 permitAll 경로들도 추가
                 // ...
                 ;
