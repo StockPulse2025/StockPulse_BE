@@ -50,4 +50,18 @@ public class StockTick {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
+
+    public void updateTick(LocalDate date, BigDecimal closePrice, BigDecimal openPrice, 
+                          BigDecimal highPrice, BigDecimal lowPrice, BigDecimal tradingValue, 
+                          BigDecimal tradingVolume, BigDecimal changeAmount, BigDecimal changeRate) {
+        this.date = date;
+        this.closePrice = closePrice;
+        this.openPrice = openPrice;
+        this.highPrice = highPrice;
+        this.lowPrice = lowPrice;
+        this.tradingValue = tradingValue;
+        this.tradingVolume = tradingVolume;
+        this.changeAmount = changeAmount;
+        this.changeRate = changeRate;
+    }
 }
