@@ -109,6 +109,17 @@ public class StockResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class StockTickDataDTO {
+        private String symbol;
+        private BigDecimal currentPrice;
+        private BigDecimal changeRate;
+        private BigDecimal changeAmount;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class StockCandleListDTO{
         private Long stockId;
         private String stockName;

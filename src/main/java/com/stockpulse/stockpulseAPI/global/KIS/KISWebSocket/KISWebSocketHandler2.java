@@ -1,16 +1,19 @@
 package com.stockpulse.stockpulseAPI.global.KIS.KISWebSocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +23,8 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class KISWebSocketHandler2 extends TextWebSocketHandler {
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     private static final List<String> STOCK_CODE = List.of(
             "066570", "323410", "003550", "017670", "018260",
@@ -109,8 +114,17 @@ public class KISWebSocketHandler2 extends TextWebSocketHandler {
                 updateMap.put("changeAmount", WGHN_AVRG_STCK_PRC);
 
                 String stockKey = "stock:tick:" + MKSC_SHRN_ISCD;
-
                 redisTemplate.opsForHash().putAll(stockKey, updateMap);
+
+                // WebSocket 전송
+                StockResponseDTO.StockTickDataDTO stockData = StockResponseDTO.StockTickDataDTO.builder()
+                        .symbol(MKSC_SHRN_ISCD)
+                        .currentPrice(new BigDecimal(STCK_PRPR))
+                        .changeRate(new BigDecimal(PRDY_CTRT))
+                        .changeAmount(new BigDecimal(WGHN_AVRG_STCK_PRC))
+                        .build();
+
+                messagingTemplate.convertAndSend("/sub/" + MKSC_SHRN_ISCD, stockData);
             }
         } catch (Exception e) {
             log.error("체결 데이터 파싱 실패", e);
