@@ -22,4 +22,12 @@ public interface MemberFavoriteStockRepository extends JpaRepository<MemberFavor
     
     boolean existsByMemberAndStock(Member member, Stock stock);
 
+    @Query("""
+      SELECT m FROM Member m
+      JOIN MemberFavoriteStock mfs ON m.id = mfs.member.id
+      JOIN MemberOwnStock mos ON m.id = mos.member.id
+      WHERE mos.stock = :stock OR mfs.stock = :stock
+    """)
+    Optional<List<Member>> findMembersOwnStockOrMemberFavoriteStockByStockId(Stock stock);
+
 }

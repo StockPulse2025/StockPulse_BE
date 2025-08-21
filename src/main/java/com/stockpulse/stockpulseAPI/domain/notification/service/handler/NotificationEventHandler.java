@@ -17,7 +17,7 @@ public class NotificationEventHandler {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(propagation = Propagation.REQUIRES_NEW) // 🔥 이 메서드 자체를 새로운 트랜잭션으로 만듭니다.
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleMemberSavedEvent(MemberCreatedEvent event) {
         notificationService.initNotification(event.getMemberId());
     }
