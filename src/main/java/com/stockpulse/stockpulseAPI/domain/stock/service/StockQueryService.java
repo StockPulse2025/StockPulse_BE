@@ -2,7 +2,7 @@ package com.stockpulse.stockpulseAPI.domain.stock.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
-import com.stockpulse.stockpulseAPI.domain.stock.KISClient;
+import com.stockpulse.stockpulseAPI.global.KIS.KISRestApi.KISRestClient;
 import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
@@ -35,7 +35,7 @@ public class StockQueryService {
     private final RedisTemplate<String, String> redisTemplate;
     private final MemberFavoriteStockRepository memberFavoriteStockRepository;
     private final MemberOwnStockRepository memberOwnStockRepository;
-    private final KISClient kisClient;
+    private final KISRestClient kisRestClient;
 
     // 주식 검색
     public List<StockResponseDTO.StockSearchResultDTO> searchStocks(String keyword) {
@@ -95,7 +95,7 @@ public class StockQueryService {
     public StockResponseDTO.StockCandleListDTO getStockCandleData(
             Long stockId, StockRequestDTO.ChartPeriodType period){
         Stock stock = getStockById(stockId);
-        return kisClient.getStockCandleListDTO(stock, period);
+        return kisRestClient.getStockCandleListDTO(stock, period);
     }
     
     private void sortStocksByChartType(List<StockResponseDTO.StockRankDTO> stockList, 
