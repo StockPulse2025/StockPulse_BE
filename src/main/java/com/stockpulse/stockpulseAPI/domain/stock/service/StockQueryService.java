@@ -2,7 +2,7 @@ package com.stockpulse.stockpulseAPI.domain.stock.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
-import com.stockpulse.stockpulseAPI.global.KIS.KISRestClient;
+import com.stockpulse.stockpulseAPI.global.KIS.KISRestApi.KISRestClient;
 import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;

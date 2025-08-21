@@ -1,4 +1,4 @@
-package com.stockpulse.stockpulseAPI.global.KIS;
+package com.stockpulse.stockpulseAPI.global.KIS.KISRestApi;
 
 import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockHistoryResponse;
