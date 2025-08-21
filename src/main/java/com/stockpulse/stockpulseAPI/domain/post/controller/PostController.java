@@ -8,6 +8,7 @@ import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
 import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -35,8 +36,16 @@ public class PostController {
     @Operation(summary = "게시글 목록 조회", description = "게시글 목록을 조회합니다.")
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<PostResponseDto.PostSummaryDto>>> list(
+            @Parameter(description = "페이지 번호(0부터 시작)", example = "0")
             @RequestParam("page") int page,
+            @Parameter(description = "한 페이지 당 게시글 수", example = "10")
             @RequestParam("size") int size,
+            @Parameter(description = "정렬 기준",
+                    examples = {
+                            @ExampleObject(name = "인기순", value = "popular", summary = "투표 많은 순"),
+                            @ExampleObject(name = "댓글순", value = "comment", summary = "댓글 많은 순"),
+                            @ExampleObject(name = "최신순", value = "latest", summary = "최신 작성 순")
+                    })
             @RequestParam("sort") String sort) {
         List<PostResponseDto.PostSummaryDto> posts = postService.getPostList(page, size, sort);
         return ResponseEntity
