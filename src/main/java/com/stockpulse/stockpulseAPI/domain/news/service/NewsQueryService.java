@@ -5,14 +5,14 @@ import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
 import com.stockpulse.stockpulseAPI.domain.news.dto.NewsRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
-import com.stockpulse.stockpulseAPI.domain.news.entity.MemberScrapNews;
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Sentiment;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.MemberScrapNewsRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
-import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.StockTick;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.StockTickRepository;
 import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.MemberHandler;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.NewsHandler;
@@ -27,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.stockpulse.stockpulseAPI.domain.news.converter.NewsConverter.*;
 
@@ -38,10 +37,11 @@ public class NewsQueryService {
 
     private final NewsRepository newsRepository;
     private final MemberRepository memberRepository;
-    private final StockRepository stockRepository;
+    private final StockTickRepository stockTickRepository;
     private final ImpactRepository impactRepository;
     private final MemberScrapNewsRepository memberScrapNewsRepository;
 
+    // 뉴스 상세 조회
     public NewsResponseDTO.NewsDetailResponseDTO getNewsDetail(Long newsId, Long userId) {
         News news = newsRepository.findByIdWithImpacts(newsId)
                 .orElseThrow(() -> new NewsHandler(ErrorStatus.NEWS_NOT_FOUND));
@@ -60,13 +60,13 @@ public class NewsQueryService {
         for (int i = 0; i < impacts.size(); i++) {
             Impact impact = impacts.get(i);
             newsDetailStockDTOS.add(
-                    toNewsDetailStockDTO(
-                            impact.getStock(), impact, BigDecimal.valueOf(10.01), BigDecimal.valueOf(10.0), i + 1) // TODO : Redis 연동 후 수정
+                    createStockInfoWithTick(impact.getStock(), impact, i + 1)
             );
         }
         return toNewsDetailResponseDTO(news, newsDetailStockDTOS, isScrapped, sentiment);
     }
 
+    // 메인 뉴스 조회
     public NewsResponseDTO.NewsOverviewDTO getMainNews(Long memberId) {
 
         Pageable topOne = PageRequest.of(0,1);
@@ -84,8 +84,51 @@ public class NewsQueryService {
                 .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         boolean scrapped = memberScrapNewsRepository.findByMemberAndNews(member, relatedNews).isPresent();
 
-        NewsResponseDTO.NewsOverviewStockDTO stockInfo = toNewsOverviewStockDTO(highestImpactStock, highestImpact, BigDecimal.valueOf(10.01), BigDecimal.valueOf(10.0)); // TODO : Redis 연동 후 수정
+        StockTick stockTick = getLatestStockTick(highestImpactStock);
+        BigDecimal currentPrice = stockTick != null ? stockTick.getClosePrice() : BigDecimal.ZERO;
+        BigDecimal priceChange = stockTick != null ? stockTick.getChangeRate() : BigDecimal.ZERO;
+        NewsResponseDTO.NewsOverviewStockDTO stockInfo = toNewsOverviewStockDTO(highestImpactStock, highestImpact, currentPrice, priceChange);
         return toNewsOverviewDTO(relatedNews, scrapped, sentiment, stockInfo);
+    }
+
+    public List<NewsResponseDTO.NewsDTO> getFilteredNews(NewsRequestDTO.NewsFilterRequest request, Long memberId) {
+        List<News> filteredNews = newsRepository.dynamicQueryWithBooleanBuilder(request, memberId);
+        
+        // 영향도순 정렬
+        if (request.getSort() != null && request.getSort() == NewsRequestDTO.NewsFilterRequest.SortType.IMPACT) {
+            filteredNews = filteredNews.stream()
+                .sorted((n1, n2) -> {
+                    var max1 = n1.getImpacts().stream()
+                        .map(impact -> impact.getImpactRate().abs())
+                        .max(java.math.BigDecimal::compareTo)
+                        .orElse(java.math.BigDecimal.ZERO);
+                    var max2 = n2.getImpacts().stream()
+                        .map(impact -> impact.getImpactRate().abs())
+                        .max(java.math.BigDecimal::compareTo)
+                        .orElse(java.math.BigDecimal.ZERO);
+                    return max2.compareTo(max1);
+                })
+                .toList();
+        }
+        
+        return filteredNews.stream()
+                .map(news -> {
+                    Member member = memberRepository.findById(memberId)
+                            .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+                    boolean scrapped = memberScrapNewsRepository.findByMemberAndNews(member, news).isPresent();
+
+                    Impact maxImpact = news.getImpacts().stream()
+                            .max((i1, i2) -> i1.getImpactRate().abs().compareTo(i2.getImpactRate().abs()))
+                            .orElse(null);
+                    
+                    Sentiment sentiment = maxImpact != null ? determineSentiment(maxImpact) : Sentiment.NEUTRAL;
+
+                    NewsResponseDTO.NewsDetailStockDTO stockInfo = maxImpact != null ? 
+                            createStockInfoWithTick(maxImpact.getStock(), maxImpact, 1) : null;
+                    
+                    return toNewsDTO(news, scrapped, sentiment, stockInfo);
+                })
+                .toList();
     }
 
     private Sentiment determineSentiment(Impact impact) {
@@ -96,5 +139,17 @@ public class NewsQueryService {
             return Sentiment.NEGATIVE;
         }
         return Sentiment.NEUTRAL;
+    }
+
+    private StockTick getLatestStockTick(Stock stock) {
+        return stockTickRepository.findByStock(stock).orElse(null);
+    }
+
+    private NewsResponseDTO.NewsDetailStockDTO createStockInfoWithTick(Stock stock, Impact impact, Integer rank) {
+        StockTick stockTick = getLatestStockTick(stock);
+        BigDecimal currentPrice = stockTick != null ? stockTick.getClosePrice() : BigDecimal.ZERO;
+        BigDecimal priceChange = stockTick != null ? stockTick.getChangeRate() : BigDecimal.ZERO;
+        
+        return toNewsDetailStockDTO(stock, impact, currentPrice, priceChange, rank);
     }
 }

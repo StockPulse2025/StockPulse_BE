@@ -14,6 +14,23 @@ public class NewsResponseDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class NewsDTO{
+        private Long newsId;
+        private String newsTitle;
+        private String newsUrl;
+        private String newsImage;
+        private String press;
+        private Sentiment sentiment;
+        private LocalDateTime publishedDate;
+        private Boolean scrapped;
+        private NewsDetailStockDTO stockInfo;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class NewsDetailResponseDTO {
         private Long newsId;
         private String newsTitle;
