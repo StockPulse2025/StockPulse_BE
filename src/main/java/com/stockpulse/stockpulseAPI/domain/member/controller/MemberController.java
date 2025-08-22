@@ -3,6 +3,7 @@ package com.stockpulse.stockpulseAPI.domain.member.controller;
 import com.stockpulse.stockpulseAPI.domain.member.dto.MemberRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.member.service.MemberService;
 import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDTO;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
 import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,18 +37,18 @@ public class MemberController {
     @Operation(
             summary = "사용자 닉네임 변경",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "닉네임 정보",
-                required = true,
-                content = @Content(
-                        mediaType = "application/json",
-                        schema = @Schema(implementation = MemberRequestDTO.UpdateDTO.class)
-                        , examples = @ExampleObject(value = """
-                                {
-                                    "nickname": "주식똑똑이"
-                                }
-                                """
-                        )
-                )
+                    description = "닉네임 정보",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MemberRequestDTO.UpdateDTO.class)
+                            , examples = @ExampleObject(value = """
+                            {
+                                "nickname": "주식똑똑이"
+                            }
+                            """
+                    )
+                    )
             )
     )
     @PatchMapping("/nickname")
@@ -64,6 +65,23 @@ public class MemberController {
     @GetMapping("/news/scrap")
     public ResponseEntity<ApiResponse<List<NewsResponseDTO.NewsOverviewDTO>>> getScrapNews(@AuthUser Long userId) {
         List<NewsResponseDTO.NewsOverviewDTO> response = memberService.getScrapNews(userId);
+        return ResponseEntity.ok(
+                ApiResponse.onSuccess(response)
+        );
+    }
+
+    @GetMapping("/post/publish")
+    public ResponseEntity<ApiResponse<List<PostResponseDTO.SummaryDTO>>> getPublishedPosts(@AuthUser Long userId) {
+        List<PostResponseDTO.SummaryDTO> response = memberService.getPublishedPosts(userId);
+
+        return ResponseEntity.ok(
+                ApiResponse.onSuccess(response)
+        );
+    }
+
+    @GetMapping("/post/comment")
+    public ResponseEntity<ApiResponse<List<PostResponseDTO.SummaryDTO>>> getCommentedPosts(@AuthUser Long userId) {
+        List<PostResponseDTO.SummaryDTO> response = memberService.getCommentedPosts(userId);
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(response)
         );

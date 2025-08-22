@@ -2,7 +2,7 @@ package com.stockpulse.stockpulseAPI.domain.post.controller;
 
 import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.post.dto.PostRequestDto;
-import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDto;
+import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.post.service.PostService;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
@@ -35,7 +35,7 @@ public class PostController {
     // TODO : 게시글 목록 조회
     @Operation(summary = "게시글 목록 조회", description = "게시글 목록을 조회합니다.")
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse<List<PostResponseDto.PostSummaryDto>>> list(
+    public ResponseEntity<ApiResponse<List<PostResponseDTO.SummaryDTO>>> list(
             @Parameter(description = "페이지 번호(0부터 시작)", example = "0")
             @RequestParam("page") int page,
             @Parameter(description = "한 페이지 당 게시글 수", example = "10")
@@ -47,7 +47,7 @@ public class PostController {
                             @ExampleObject(name = "최신순", value = "latest", summary = "최신 작성 순")
                     })
             @RequestParam("sort") String sort) {
-        List<PostResponseDto.PostSummaryDto> posts = postService.getPostList(page, size, sort);
+        List<PostResponseDTO.SummaryDTO> posts = postService.getPostList(page, size, sort);
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.onSuccess(posts));
@@ -92,7 +92,7 @@ public class PostController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "댓글 성공적으로 등록됨",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostResponseDto.CommentResponseDto.class),
+                            schema = @Schema(implementation = PostResponseDTO.CommentDTO.class),
                             examples = @ExampleObject(value = "{\"isSuccess\":true,\"code\":\"201\",\"message\":\"Created\",\"result\":{\"postId\":101}}"))),
     })
     @PostMapping("/write")
@@ -112,12 +112,12 @@ public class PostController {
     // 댓글 등록
     @PostMapping("/comment/{postId}")
     @Operation(summary = "댓글 등록", description = "댓글을 등록합니다.")
-    public ResponseEntity<ApiResponse<PostResponseDto.CommentResponseDto>> comment(
+    public ResponseEntity<ApiResponse<PostResponseDTO.CommentDTO>> comment(
             @AuthUser Long userId,
             @PathVariable Long postId,
             @RequestBody String content
     ) {
-        PostResponseDto.CommentResponseDto response = postService.createComment(userId, postId, content);
+        PostResponseDTO.CommentDTO response = postService.createComment(userId, postId, content);
 
         return ResponseEntity
                 .created(URI.create("/api/post/" + postId))
@@ -128,8 +128,8 @@ public class PostController {
     // TODO : 게시글 상세 조회
     @GetMapping("/{postId}")
     @Operation(summary = "게시글 상세 조회", description = "게시글 단건을 상세 조회합니다.")
-    public ResponseEntity<ApiResponse<PostResponseDto.PostDetailDto>> detail(@AuthUser Long userId, @PathVariable Long postId) {
-        PostResponseDto.PostDetailDto response = postService.getPostDetail(userId, postId);
+    public ResponseEntity<ApiResponse<PostResponseDTO.DetailDTO>> detail(@AuthUser Long userId, @PathVariable Long postId) {
+        PostResponseDTO.DetailDTO response = postService.getPostDetail(userId, postId);
 
         return ResponseEntity.ok()
                 .body(ApiResponse.onSuccess(response));
@@ -165,7 +165,7 @@ public class PostController {
                             description = "투표 참여 성공",
                             content = @Content(
                                     mediaType = "application/json",
-                                        schema = @Schema(implementation = PostResponseDto.VoteResponseDTO.class),
+                                        schema = @Schema(implementation = PostResponseDTO.VoteDTO.class),
                                     examples = @ExampleObject(value = """
                                                 {
                                                   "isSuccess": true,
@@ -189,11 +189,11 @@ public class PostController {
                     )
             }
     )
-    public ResponseEntity<ApiResponse<PostResponseDto.VoteResponseDTO>> vote(
+    public ResponseEntity<ApiResponse<PostResponseDTO.VoteDTO>> vote(
             @AuthUser long userId,
             @PathVariable long postId,
             @RequestBody PostRequestDto.VoteParticipationDTO voteParticipationDTO) {
-        PostResponseDto.VoteResponseDTO response = postService.vote(userId, postId, voteParticipationDTO);
+        PostResponseDTO.VoteDTO response = postService.vote(userId, postId, voteParticipationDTO);
         return ResponseEntity
                 .created(URI.create("/api/post/" + postId))
                 .body(ApiResponse.onSuccess(response));

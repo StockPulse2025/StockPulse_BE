@@ -10,6 +10,10 @@ import com.stockpulse.stockpulseAPI.domain.news.entity.MemberScrapNews;
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Sentiment;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
+import com.stockpulse.stockpulseAPI.domain.news.repository.MemberScrapNewsRepository;
+import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.post.entity.Comment;
+import com.stockpulse.stockpulseAPI.domain.post.entity.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +29,7 @@ import java.util.stream.Collectors;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final ImpactRepository impactRepository;
+    private final MemberScrapNewsRepository memberScrapNewsRepository;
 
     public String getNickname(Long userId) {
         return memberRepository.findById(userId)
@@ -49,7 +54,7 @@ public class MemberService {
 
         List<News> newsList = scrapNewsList.stream()
                                 .map(MemberScrapNews::getNews)
-
+                                .distinct()
                                 .toList();
 
         List<Impact> topImpacts = impactRepository.findTopImpactsForNewsList(newsList);
@@ -78,6 +83,22 @@ public class MemberService {
                             stockDTO
                     );
                 })
+                .collect(Collectors.toList());
+    }
+
+    public List<PostResponseDTO.SummaryDTO> getPublishedPosts(Long userId) {
+        List<Post> posts = memberRepository.findPostsWithDetailByUserId(userId);
+
+        return posts.stream()
+                .map(PostResponseDTO.SummaryDTO::from)
+                .collect(Collectors.toList());
+    }
+
+    public List<PostResponseDTO.SummaryDTO> getCommentedPosts(Long userId) {
+        List<Comment> comments = memberRepository.findPostsCommentedByUserId(userId);
+        return comments.stream()
+                .map(Comment::getPost)
+                .map(PostResponseDTO.SummaryDTO::from)
                 .collect(Collectors.toList());
     }
 
