@@ -7,7 +7,7 @@ import com.stockpulse.stockpulseAPI.domain.news.entity.News;
 import com.stockpulse.stockpulseAPI.domain.news.exception.NewsException;
 import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
 import com.stockpulse.stockpulseAPI.domain.post.dto.PostRequestDto;
-import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDto;
+import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.post.entity.*;
 import com.stockpulse.stockpulseAPI.domain.post.entity.enums.VoteOption;
 import com.stockpulse.stockpulseAPI.domain.post.repository.CommentRepository;
@@ -39,7 +39,7 @@ public class PostService {
     private final VoteRecordRepository voteRecordRepository;
     private final CommentRepository commentRepository;
 
-    public List<PostResponseDto.PostSummaryDto> getPostList(int page, int size, String sort) {
+    public List<PostResponseDTO.SummaryDTO> getPostList(int page, int size, String sort) {
         Sort sortOption;
 
         switch (sort.toLowerCase()) {
@@ -59,7 +59,7 @@ public class PostService {
         Page<Post> postPage = postRepository.findAll(pageable);
 
         return postPage.getContent().stream()
-                .map(post -> PostResponseDto.PostSummaryDto.builder()
+                .map(post -> PostResponseDTO.SummaryDTO.builder()
                         .postId(post.getId())
                         .title(post.getTitle())
                         .contentSummary(post.getContent().length() <= 40 ?
@@ -125,7 +125,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto.CommentResponseDto createComment(Long userId, Long postId, String content) {
+    public PostResponseDTO.CommentDTO createComment(Long userId, Long postId, String content) {
         Member member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("Member not found")); // TODO : 커스텀 Exception 추가 필요
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found")); // TODO : 커스텀 Exception 추가 필요
 
@@ -139,7 +139,7 @@ public class PostService {
 
         post.setCommentCount(post.getCommentCount() + 1);
 
-        PostResponseDto.CommentResponseDto dto = PostResponseDto.CommentResponseDto.builder()
+        PostResponseDTO.CommentDTO dto = PostResponseDTO.CommentDTO.builder()
                 .commentId(comment.getId())
                 .content(content)
                 .createdAt(post.getCreatedAt().toString())
@@ -149,11 +149,11 @@ public class PostService {
         return dto;
     }
 
-    public PostResponseDto.PostDetailDto getPostDetail(Long userId, Long postId) {
+    public PostResponseDTO.DetailDTO getPostDetail(Long userId, Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found")); // TODO : 커스텀 Exception 추가 필요
         Member member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("Member not found"));// TODO : 커스텀 Exception 추가 필요
 
-        PostResponseDto.PostDetailDto dto = PostResponseDto.PostDetailDto.builder()
+        PostResponseDTO.DetailDTO dto = PostResponseDTO.DetailDTO.builder()
                 .postId(post.getId())
                 .author(post.getMember().getNickname())
                 .updatedAt(post.getUpdatedAt().toString())
@@ -172,7 +172,7 @@ public class PostService {
                 .stockImageUrl(post.getStock().getImageUrl())
                 .isStockOwned(member.getMemberOwnStockList().contains(post.getStock()))
                 .isStockFavorite(member.getMemberFavoriteStockList().contains(post.getStock()))
-                .voteSummary(PostResponseDto.VoteResponseDTO.builder()
+                .voteSummary(PostResponseDTO.VoteDTO.builder()
                         .postId(post.getId())
                         .buy(post.getVote().getBuy())
                         .sell(post.getVote().getSell())
@@ -180,7 +180,7 @@ public class PostService {
                         .total(post.getVote().getTotal())
                         .build())
                 .commentCount(post.getCommentCount())
-                .comments(post.getComments().stream().map(comment -> PostResponseDto.CommentResponseDto.builder()
+                .comments(post.getComments().stream().map(comment -> PostResponseDTO.CommentDTO.builder()
                         .commentId(comment.getId())
                         .content(comment.getContent())
                         .createdAt(comment.getCreatedAt().toString())
@@ -193,7 +193,7 @@ public class PostService {
 
     // TODO : 투표 참여
     @Transactional
-    public PostResponseDto.VoteResponseDTO vote(Long userId, long postId, PostRequestDto.VoteParticipationDTO voteParticipationDTO) {
+    public PostResponseDTO.VoteDTO vote(Long userId, long postId, PostRequestDto.VoteParticipationDTO voteParticipationDTO) {
         Member member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("Member not found")); // TODO : 커스텀 Exception 추가 필요
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found")); // TODO : 커스텀 Exception 추가 필요
         Vote vote = post.getVote();
@@ -227,7 +227,7 @@ public class PostService {
         post.setVoteCount(post.getVoteCount() + 1);
         vote.setTotal(vote.getTotal() + 1);
 
-        PostResponseDto.VoteResponseDTO dto = PostResponseDto.VoteResponseDTO.builder()
+        PostResponseDTO.VoteDTO dto = PostResponseDTO.VoteDTO.builder()
                 .postId(post.getId())
                 .buy(vote.getBuy())
                 .sell(vote.getSell())

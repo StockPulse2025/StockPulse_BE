@@ -1,17 +1,17 @@
 package com.stockpulse.stockpulseAPI.domain.post.dto;
 
-import com.stockpulse.stockpulseAPI.domain.post.entity.Comment;
+import com.stockpulse.stockpulseAPI.domain.post.entity.Post;
 import lombok.*;
 
 import java.util.List;
 
-public class PostResponseDto {
+public class PostResponseDTO {
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class PostSummaryDto {
+    public static class SummaryDTO {
         private Long postId;
         private String title;
         private String contentSummary;
@@ -29,13 +29,35 @@ public class PostResponseDto {
         private String stockName;
         private Long stockPrice;
         private Float stockChangeRate;
+
+        public static SummaryDTO from(Post post) {
+            String summary = post.getContent().length() <= 40 ?
+                    post.getContent() :
+                    post.getContent().substring(0, 40) + "...";
+
+            return SummaryDTO.builder()
+                    .postId(post.getId())
+                    .title(post.getTitle())
+                    .contentSummary(summary)
+                    .createdAt(post.getCreatedAt().toString())
+                    .author(post.getMember().getNickname())
+                    .commentCount(post.getCommentCount())
+                    .voteCount(post.getVoteCount())
+                    .newsImageUrl(post.getNews().getImage())
+                    .newsTitle(post.getNews().getTitle())
+                    .newsPublishedDate(post.getNews().getPublishedDate().toString())
+                    .newsPublisher(post.getNews().getPress())
+                    .stockImageUrl(post.getStock().getImageUrl())
+                    .stockName(post.getStock().getName())
+                    .build();
+        }
     }
 
-    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    public static class PostDetailDto {
+    @Builder
+    public static class DetailDTO {
         private Long postId;
         private String author;
         private String updatedAt;
@@ -57,17 +79,17 @@ public class PostResponseDto {
         private boolean isStockOwned;
         private boolean isStockFavorite;
 
-        private VoteResponseDTO voteSummary;
+        private VoteDTO voteSummary;
 
         private Integer commentCount;
-        private List<CommentResponseDto> comments;
+        private List<CommentDTO> comments;
     }
 
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    public static class VoteResponseDTO{
+    public static class VoteDTO {
         private Long postId;
         private Long buy;
         private Long sell;
@@ -79,7 +101,7 @@ public class PostResponseDto {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class CommentResponseDto {
+    public static class CommentDTO {
         private Long commentId;
         private String content;
         private String createdAt;
