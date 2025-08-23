@@ -10,6 +10,21 @@ import java.util.List;
 public class NewsResponseDTO {
 
     @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NewsTimePointDTO {
+        @Setter
+        private Integer rank;
+        private Long newsId;
+        private String newsTitle;
+        private String newsImage;
+        private String press;
+        private LocalDateTime publishedDate;
+        private BigDecimal influenceScore;
+    }
+
+    @Getter
     @Setter
     @Builder
     @NoArgsConstructor

@@ -40,6 +40,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Stock 관련
     STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK_001", "존재하지 않는 종목입니다."),
+    STOCK_UNSUPPORTED_CHART_PERIOD(HttpStatus.BAD_REQUEST, "STOCK_002", "지원하지 않는 차트 기간 타입입니다."),
 
     // News 관련
     NEWS_NOT_FOUND(HttpStatus.NOT_FOUND, "NEWS_001", "존재하지 않는 뉴스입니다."),

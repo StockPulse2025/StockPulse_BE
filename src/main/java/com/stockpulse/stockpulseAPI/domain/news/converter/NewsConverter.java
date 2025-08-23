@@ -92,4 +92,16 @@ public class NewsConverter {
                 .stockInfo(stockInfo)
                 .build();
     }
+
+    public static NewsResponseDTO.NewsTimePointDTO toNewsTimePointDTO(News news, Impact impact, Integer rank) {
+        return NewsResponseDTO.NewsTimePointDTO.builder()
+                .rank(rank)
+                .newsId(news.getId())
+                .newsTitle(news.getTitle())
+                .newsImage(news.getImage())
+                .press(news.getPress())
+                .publishedDate(news.getPublishedDate())
+                .influenceScore(impact.getImpactRate())
+                .build();
+    }
 }
