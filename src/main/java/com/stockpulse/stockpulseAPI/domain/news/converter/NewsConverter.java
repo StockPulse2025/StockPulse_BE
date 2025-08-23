@@ -78,4 +78,30 @@ public class NewsConverter {
                 .influenceScore(impact.getImpactRate())
                 .build();
     }
+
+    public static NewsResponseDTO.NewsDTO toNewsDTO(News news, boolean scrapped, Sentiment sentiment, NewsResponseDTO.NewsDetailStockDTO stockInfo) {
+        return NewsResponseDTO.NewsDTO.builder()
+                .newsId(news.getId())
+                .newsTitle(news.getTitle())
+                .newsUrl(news.getUrl())
+                .newsImage(news.getImage())
+                .press(news.getPress())
+                .sentiment(sentiment)
+                .publishedDate(news.getPublishedDate())
+                .scrapped(scrapped)
+                .stockInfo(stockInfo)
+                .build();
+    }
+
+    public static NewsResponseDTO.NewsTimePointDTO toNewsTimePointDTO(News news, Impact impact, Integer rank) {
+        return NewsResponseDTO.NewsTimePointDTO.builder()
+                .rank(rank)
+                .newsId(news.getId())
+                .newsTitle(news.getTitle())
+                .newsImage(news.getImage())
+                .press(news.getPress())
+                .publishedDate(news.getPublishedDate())
+                .influenceScore(impact.getImpactRate())
+                .build();
+    }
 }

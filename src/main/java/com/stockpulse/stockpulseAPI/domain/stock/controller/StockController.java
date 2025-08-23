@@ -1,7 +1,9 @@
 package com.stockpulse.stockpulseAPI.domain.stock.controller;
 
+import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.enums.ChartPeriodType;
 import com.stockpulse.stockpulseAPI.domain.stock.service.StockCommandService;
 import com.stockpulse.stockpulseAPI.domain.stock.service.StockQueryService;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
@@ -107,6 +109,30 @@ public class StockController {
             @RequestParam("type") StockRequestDTO.RealTimeChartType chartType,
             @AuthUser Long memberId) {
         List<StockResponseDTO.StockRankDTO> result = stockQueryService.getStockChart(chartType, memberId);
+        return ApiResponse.onSuccess(result);
+    }
+
+
+    @Operation(
+            summary = "종목 특정 시점 별 영향도 기준 뉴스 리스트 조회 API",
+            description = """
+    - 종목 캔들 차트의 특정 시점의 영향도 기준 뉴스 리스트를 조회하여 반환합니다.
+    - 대상이 되는 종목의 Id, 차트 기간(period), 조회하고자 하는 날짜를 넘겨주세요.
+    - 날짜 형식: yyyy-MM-dd (예: 2024-01-15)
+    
+    차트 기간 타입 및 날짜 예시:
+    - DAY: 일봉 기준 (예: 2024-01-15 → 해당 날짜의 뉴스 조회)
+    - WEEK: 주봉 기준 (예: 2024-01-15 → 해당 주의 월요일~일요일 뉴스 조회)
+    - MONTH: 월봉 기준 (예: 2024-01-15 → 2024년 1월 전체 뉴스 조회)
+    """
+    )
+    @GetMapping("/{stockId}/timepoint")
+    public ApiResponse<List<NewsResponseDTO.NewsTimePointDTO>> getStockNewsByTimepoint(
+            @PathVariable("stockId") Long stockId,
+            @RequestParam("period") ChartPeriodType period,
+            @RequestParam("date") String date) {
+        List<NewsResponseDTO.NewsTimePointDTO> result
+                = stockQueryService.getNewsTimePoint(stockId, period, date);
         return ApiResponse.onSuccess(result);
     }
 }

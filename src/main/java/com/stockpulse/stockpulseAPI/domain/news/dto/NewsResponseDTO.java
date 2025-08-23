@@ -10,6 +10,38 @@ import java.util.List;
 public class NewsResponseDTO {
 
     @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NewsTimePointDTO {
+        @Setter
+        private Integer rank;
+        private Long newsId;
+        private String newsTitle;
+        private String newsImage;
+        private String press;
+        private LocalDateTime publishedDate;
+        private BigDecimal influenceScore;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NewsDTO{
+        private Long newsId;
+        private String newsTitle;
+        private String newsUrl;
+        private String newsImage;
+        private String press;
+        private Sentiment sentiment;
+        private LocalDateTime publishedDate;
+        private Boolean scrapped;
+        private NewsDetailStockDTO stockInfo;
+    }
+
+    @Getter
     @Setter
     @Builder
     @NoArgsConstructor
@@ -93,5 +125,14 @@ public class NewsResponseDTO {
         private String press;
         private String publishedDate;
         private String imageUrl;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class newsSummaryDTO {
+        private String content;
     }
 }

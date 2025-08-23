@@ -2,6 +2,13 @@ package com.stockpulse.stockpulseAPI.domain.stock.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
+import com.stockpulse.stockpulseAPI.domain.news.converter.NewsConverter;
+import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
+import com.stockpulse.stockpulseAPI.domain.news.entity.News;
+import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
+import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.enums.ChartPeriodType;
 import com.stockpulse.stockpulseAPI.global.KIS.KISRestApi.KISRestClient;
 import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
@@ -21,17 +28,26 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.stockpulse.stockpulseAPI.domain.news.converter.NewsConverter.toNewsTimePointDTO;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class StockQueryService {
 
+    private static final int INITIAL_RANK = 1;
+    
     private final StockRepository stockRepository;
     private final StockTickRepository stockTickRepository;
     private final MemberRepository memberRepository;
+    private final NewsRepository newsRepository;
+    private final ImpactRepository impactRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final MemberFavoriteStockRepository memberFavoriteStockRepository;
     private final MemberOwnStockRepository memberOwnStockRepository;
@@ -96,6 +112,67 @@ public class StockQueryService {
             Long stockId, StockRequestDTO.ChartPeriodType period){
         Stock stock = getStockById(stockId);
         return kisRestClient.getStockCandleListDTO(stock, period);
+    }
+
+    // 종목 특정 시점별 뉴스 조회
+    public List<NewsResponseDTO.NewsTimePointDTO> getNewsTimePoint(
+            Long stockId, ChartPeriodType chartPeriodType, String date) {
+
+        Stock stock = getStockById(stockId);
+
+        LocalDateTime baseDate = parseDate(date);
+        LocalDateTime[] dateRange = calculateDateRange(baseDate, chartPeriodType);
+
+        LocalDateTime startDate = dateRange[0];
+        LocalDateTime endDate = dateRange[1];
+
+        List<News> newsList = newsRepository.findByStockAndDateRange(stockId, startDate, endDate);
+
+        List<NewsResponseDTO.NewsTimePointDTO> result = new ArrayList<>();
+        int rank = INITIAL_RANK;
+
+        for(News news : newsList) {
+            Optional<Impact> impact = impactRepository.findByNewsAndStock(news, stock);
+            if(impact.isPresent()) {
+                result.add(toNewsTimePointDTO(news, impact.get(), rank));
+                rank++;
+            }
+        }
+        return result;
+    }
+    
+    private LocalDateTime parseDate(String dateStr) {
+        try {
+            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            return date.atStartOfDay();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. yyyy-MM-dd 형식을 사용하세요: " + dateStr);
+        }
+    }
+    
+    private LocalDateTime[] calculateDateRange(LocalDateTime baseDate, ChartPeriodType period) {
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+        
+        switch (period) {
+            case DAY:
+                startDate = baseDate.withHour(0).withMinute(0).withSecond(0);
+                endDate = baseDate.withHour(23).withMinute(59).withSecond(59);
+                break;
+            case WEEK:
+                startDate = baseDate.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
+                endDate = baseDate.with(java.time.DayOfWeek.SUNDAY).withHour(23).withMinute(59).withSecond(59);
+                break;
+            case MONTH:
+                startDate = baseDate.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+                endDate = baseDate.withDayOfMonth(baseDate.toLocalDate().lengthOfMonth())
+                         .withHour(23).withMinute(59).withSecond(59);
+                break;
+            default:
+                throw new StockHandler(ErrorStatus.STOCK_UNSUPPORTED_CHART_PERIOD);
+        }
+        
+        return new LocalDateTime[]{startDate, endDate};
     }
     
     private void sortStocksByChartType(List<StockResponseDTO.StockRankDTO> stockList, 

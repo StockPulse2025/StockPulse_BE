@@ -10,12 +10,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/news")
+@Tag(name = "News", description = "뉴스 관련 API")
 public class NewsController {
 
     private final NewsCommandService newsCommandService;
@@ -201,5 +205,51 @@ public class NewsController {
     public ApiResponse<NewsResponseDTO.NewsOverviewDTO> getNewsDetail(@AuthUser Long memberId) {
         NewsResponseDTO.NewsOverviewDTO result = newsQueryService.getMainNews(memberId);
         return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(
+            summary = "뉴스룸 필터링 조회 API",
+            description = """
+    뉴스를 필터링하여 조회하는 API입니다.
+    
+    정렬 옵션:
+    - LATEST: 최신순 정렬 (발행일 기준 내림차순)
+    - IMPACT: 영향도순 정렬 (절댓값 기준 내림차순)
+    
+    종목 필터링:
+    - allStock: 전체 종목 대상
+    - ownedStock: 사용자 보유 종목 관련 뉴스만
+    - favoriteStock: 사용자 관심 종목 관련 뉴스만
+    
+    산업군 필터링:
+    - industries: 선택한 산업군(카테고리)에 속한 종목 관련 뉴스만 조회
+    - 예시: ["IT소프트웨어", "반도체", "금융보험"]
+    
+    민감도(영향도) 필터링:
+    - positive: 호재 뉴스 (양수 영향도 범위 설정 가능)
+    - negative: 악재 뉴스 (음수 영향도 범위 설정 가능)
+    - neutral: 중립 뉴스 (-0.5 ~ 0.5 범위)
+    """
+    )
+    @PostMapping("/filter")
+    public ApiResponse<List<NewsResponseDTO.NewsDTO>> getFilteredNews(
+            @AuthUser Long memberId,
+            @RequestBody NewsRequestDTO.NewsFilterRequest request
+            ) {
+        List<NewsResponseDTO.NewsDTO> result = newsQueryService.getFilteredNews(request, memberId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(
+            summary = "뉴스 본문 요약 API",
+            description = """
+    특정 뉴스의 본문 요약을 제공합니다. 본문 요약을 원하는 뉴스의 Id를 넘겨주세요.
+    """
+    )
+    @GetMapping("/{newsId}/summary")
+    public ApiResponse<NewsResponseDTO.newsSummaryDTO> getSummaryNews(
+            @PathVariable("newsId") Long newsId) {
+        NewsResponseDTO.newsSummaryDTO summary = newsQueryService.summaryNews(newsId);
+        return ApiResponse.onSuccess(summary);
     }
 }

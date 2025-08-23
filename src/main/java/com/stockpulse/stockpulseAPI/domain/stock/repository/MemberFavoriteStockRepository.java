@@ -28,6 +28,6 @@ public interface MemberFavoriteStockRepository extends JpaRepository<MemberFavor
       JOIN MemberOwnStock mos ON m.id = mos.member.id
       WHERE mos.stock = :stock OR mfs.stock = :stock
     """)
-    Optional<List<Member>> findMembersOwnStockOrMemberFavoriteStockByStockId(Stock stock);
+    Optional<List<Member>> findMembersOwnStockOrMemberFavoriteStockByStockId(@Param("stock") Stock stock);
 
 }

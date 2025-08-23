@@ -33,6 +33,37 @@ public class NewsRequestDTO {
         private List<NewsRelatedStocksDataDTO> relatedStocks;
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NewsFilterRequest {
+        private SortType sort;
+        
+        public enum SortType {
+            LATEST, IMPACT
+        }
+
+        private Boolean allStock;
+        private Boolean ownedStock;
+        private Boolean favoriteStock;
+
+        private List<String> industries;
+
+        private SensitivityFilter positive;
+        private SensitivityFilter negative;
+        private Boolean neutral;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SensitivityFilter {
+        private boolean enabled;
+        private int minImpact;
+        private int maxImpact;
+    }
 
     @Getter
     @Setter

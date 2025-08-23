@@ -40,9 +40,12 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Stock 관련
     STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK_001", "존재하지 않는 종목입니다."),
+    STOCK_UNSUPPORTED_CHART_PERIOD(HttpStatus.BAD_REQUEST, "STOCK_002", "지원하지 않는 차트 기간 타입입니다."),
 
     // News 관련
     NEWS_NOT_FOUND(HttpStatus.NOT_FOUND, "NEWS_001", "존재하지 않는 뉴스입니다."),
+    NEWS_CONTENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "NEWS_002", "뉴스 본문이 존재하지 않습니다."),
+    GEMINI_NOT_WORK(HttpStatus.INTERNAL_SERVER_ERROR, "NEWS_003", "AI 요약 서비스에 오류가 발생했습니다."),
     ;
 
     private final HttpStatus httpStatus;

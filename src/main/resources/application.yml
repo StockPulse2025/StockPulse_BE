@@ -49,3 +49,13 @@ kis:
   app_secret2: ${KIS_SECRET_KEY_2}
   approval_key1: ${KIS_APPROVAL_KEY_1}
   approval_key2: ${KIS_APPROVAL_KEY_2}
+
+google:
+  key: ${GOOGLE_API_KEY}
+
+gemini:
+  api:
+    url: ${GEMINI_API_URL}
+    key: ${GOOGLE_API_KEY}
+  prompts:
+    news-summary: ${GEMINI_NEWS_SUMMARY_PROMPT}
