@@ -239,4 +239,17 @@ public class NewsController {
         List<NewsResponseDTO.NewsDTO> result = newsQueryService.getFilteredNews(request, memberId);
         return ApiResponse.onSuccess(result);
     }
+
+    @Operation(
+            summary = "뉴스 본문 요약 API",
+            description = """
+    특정 뉴스의 본문 요약을 제공합니다. 본문 요약을 원하는 뉴스의 Id를 넘겨주세요.
+    """
+    )
+    @GetMapping("/{newsId}/summary")
+    public ApiResponse<NewsResponseDTO.newsSummaryDTO> getSummaryNews(
+            @PathVariable("newsId") Long newsId) {
+        NewsResponseDTO.newsSummaryDTO summary = newsQueryService.summaryNews(newsId);
+        return ApiResponse.onSuccess(summary);
+    }
 }

@@ -2,6 +2,8 @@ package com.stockpulse.stockpulseAPI.domain.news.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
+import com.stockpulse.stockpulseAPI.domain.news.dto.GeminiRequestDTO;
+import com.stockpulse.stockpulseAPI.domain.news.dto.GeminiResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.news.dto.NewsRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.news.entity.Impact;
@@ -17,10 +19,12 @@ import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.MemberHandler;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.NewsHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,6 +44,15 @@ public class NewsQueryService {
     private final StockTickRepository stockTickRepository;
     private final ImpactRepository impactRepository;
     private final MemberScrapNewsRepository memberScrapNewsRepository;
+
+    @Value("${gemini.api.url}")
+    private String geminiApiUrl;
+
+    @Value("${gemini.api.key}")
+    private String geminiApiKey;
+
+    @Value("${gemini.prompts.news-summary}")
+    private String newsSummaryPrompt;
 
     // 뉴스 상세 조회
     public NewsResponseDTO.NewsDetailResponseDTO getNewsDetail(Long newsId, Long userId) {
@@ -91,6 +104,7 @@ public class NewsQueryService {
         return toNewsOverviewDTO(relatedNews, scrapped, sentiment, stockInfo);
     }
 
+    // 뉴스 필터링
     public List<NewsResponseDTO.NewsDTO> getFilteredNews(NewsRequestDTO.NewsFilterRequest request, Long memberId) {
         List<News> filteredNews = newsRepository.dynamicQueryWithBooleanBuilder(request, memberId);
         
@@ -131,6 +145,53 @@ public class NewsQueryService {
                 .toList();
     }
 
+    // 뉴스 요약
+    public NewsResponseDTO.newsSummaryDTO summaryNews(Long newsId) {
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new NewsHandler(ErrorStatus.NEWS_NOT_FOUND));
+
+        String newsContent = news.getContent();
+        if (newsContent == null || newsContent.trim().isEmpty()) {
+            throw new NewsHandler(ErrorStatus.NEWS_CONTENT_NOT_FOUND);
+        }
+
+        String geminiURL = geminiApiUrl + "?key=" + geminiApiKey;
+
+        String prompt = newsSummaryPrompt + newsContent;
+
+        GeminiRequestDTO requestDto = GeminiRequestDTO.builder()
+                .contents(List.of(
+                        GeminiRequestDTO.Content.builder()
+                                .parts(List.of(
+                                        GeminiRequestDTO.Part.builder()
+                                                .text(prompt)
+                                                .build()
+                                ))
+                                .build()
+                ))
+                .build();
+
+        WebClient webClient = WebClient.builder().build();
+        try {
+            GeminiResponseDTO response = webClient.post()
+                    .uri(geminiURL)
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .bodyToMono(GeminiResponseDTO.class)
+                    .block();
+
+            String rawSummary = response.getCandidates().get(0).getContent().getParts().get(0).getText();
+            String cleanedSummary = cleanSummaryText(rawSummary);
+            return NewsResponseDTO.newsSummaryDTO.builder()
+                    .content(cleanedSummary)
+                    .build();
+
+        } catch (Exception e) {
+            throw new NewsHandler(ErrorStatus.GEMINI_NOT_WORK);
+        }
+    }
+
     private Sentiment determineSentiment(Impact impact) {
         BigDecimal rate = impact.getImpactRate();
         if (rate.compareTo(BigDecimal.ZERO) > 0) {
@@ -151,5 +212,19 @@ public class NewsQueryService {
         BigDecimal priceChange = stockTick != null ? stockTick.getChangeRate() : BigDecimal.ZERO;
         
         return toNewsDetailStockDTO(stock, impact, currentPrice, priceChange, rank);
+    }
+
+    private String cleanSummaryText(String rawSummary) {
+        if (rawSummary == null || rawSummary.trim().isEmpty()) {
+            return "요약을 생성할 수 없습니다.";
+        }
+        
+        return rawSummary
+                .replaceAll("\\\\n", "\n")
+                .replaceAll("\\\\\"", "\"")
+                .replaceAll("\\\\t", " ")
+                .replaceAll("\\s+", " ")
+                .replaceAll("^[\"'`]|[\"'`]$", "")
+                .trim();
     }
 }

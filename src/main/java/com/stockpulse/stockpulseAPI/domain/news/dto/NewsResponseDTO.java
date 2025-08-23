@@ -111,4 +111,13 @@ public class NewsResponseDTO {
         private String publishedDate;
         private String imageUrl;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class newsSummaryDTO {
+        private String content;
+    }
 }
