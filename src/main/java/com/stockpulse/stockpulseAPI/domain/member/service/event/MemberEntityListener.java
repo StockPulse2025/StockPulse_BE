@@ -1,5 +1,6 @@
-package com.stockpulse.stockpulseAPI.domain.member.entity;
+package com.stockpulse.stockpulseAPI.domain.member.service.event;
 
+import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import jakarta.persistence.PostPersist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;

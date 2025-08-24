@@ -1,4 +1,4 @@
-package com.stockpulse.stockpulseAPI.domain.member.entity;
+package com.stockpulse.stockpulseAPI.domain.member.service.event;
 
 import lombok.Getter;
 
