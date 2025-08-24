@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Component
@@ -44,15 +46,27 @@ public class KISWebSocketScheduler {
 
     @Scheduled(fixedRate = 60000)
     public void checkTimeAndManageConnections() {
-        LocalTime now = LocalTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        DayOfWeek dayOfWeek = now.getDayOfWeek();
+
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            if (isConnected) {
+                log.info("Stopping WebSocket connections - Weekend");
+                kisWebSocketClientConfig.stopConnections();
+                isConnected = false;
+            }
+            return;
+        }
+        
+        LocalTime timeNow = now.toLocalTime();
         LocalTime startTime = LocalTime.of(9, 0);
         LocalTime endTime = LocalTime.of(15, 30);
 
-        if (now.isAfter(startTime) && now.isBefore(endTime) && !isConnected) {
+        if (timeNow.isAfter(startTime) && timeNow.isBefore(endTime) && !isConnected) {
             log.info("Starting WebSocket connections within trading hours");
             kisWebSocketClientConfig.startConnections();
             isConnected = true;
-        } else if ((now.isBefore(startTime) || now.isAfter(endTime)) && isConnected) {
+        } else if ((timeNow.isBefore(startTime) || timeNow.isAfter(endTime)) && isConnected) {
             log.info("Stopping WebSocket connections outside trading hours");
             kisWebSocketClientConfig.stopConnections();
             isConnected = false;
