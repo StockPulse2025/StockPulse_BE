@@ -111,6 +111,7 @@ public class NewsConverter {
                 .newsId(news.getId())
                 .newsTitle(news.getTitle())
                 .newsImage(news.getImage())
+                .press(news.getPress())
                 .publishedDate(news.getPublishedDate())
                 .publishedDate(news.getPublishedDate())
                 .sentiment(sentiment)

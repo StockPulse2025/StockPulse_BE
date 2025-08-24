@@ -172,9 +172,11 @@ public class StockQueryService {
                     .map(Impact::getImpactRate)
                     .max((a, b) -> a.abs().compareTo(b.abs()))
                     .orElse(BigDecimal.ZERO);
-            
+
+            List<String> redisValues = getStockDataFromRedis(stock.getSymbol());
+
             StockResponseDTO.MyStockInfluenceResponse stockInfluence
-                    = StockConverter.toMyStockInfluenceResponse(stock, maxImpactRate, newsCount);
+                    = createMyStockInfluenceResponse(stock, redisValues, maxImpactRate, newsCount);
             response.add(stockInfluence);
         }
 
@@ -286,7 +288,7 @@ public class StockQueryService {
 
     private StockResponseDTO.StockDetailDTO createStockDetailDTO(Stock stock, List<String> redisValues, 
                                                                 boolean isFavorite, boolean isOwned) {
-        // Redis 캐시 미스 시 데이터베이스 폴백
+        // Redis 캐시 미스 시 데이터베이스 fallback
         if (redisValues == null || redisValues.stream().allMatch(Objects::isNull) || 
             redisValues.stream().anyMatch(value -> value == null || value.trim().isEmpty())) {
             Optional<StockTick> latestTick = stockTickRepository.findByStock(stock);
@@ -300,7 +302,7 @@ public class StockQueryService {
 
     private StockResponseDTO.StockRankDTO createStockRankDTO(Stock stock, List<String> redisValues,
                                                                  boolean isFavorite, boolean isOwned) {
-        // Redis 캐시 미스 시 데이터베이스 폴백
+        // Redis 캐시 미스 시 데이터베이스 fallback
         if (redisValues == null || redisValues.stream().allMatch(Objects::isNull) ||
                 redisValues.stream().anyMatch(value -> value == null || value.trim().isEmpty())) {
             Optional<StockTick> latestTick = stockTickRepository.findByStock(stock);
@@ -310,5 +312,19 @@ public class StockQueryService {
             return StockConverter.toStockRankDTOFallBack(stock, latestTick.get(), isFavorite, isOwned);
         }
         return StockConverter.toStockRankDTO(stock, redisValues, isFavorite, isOwned);
+    }
+
+    private StockResponseDTO.MyStockInfluenceResponse createMyStockInfluenceResponse(Stock stock, List<String> redisValues,
+                                                                                   BigDecimal maxImpactRate, int newsCount) {
+        // Redis 캐시 미스 시 데이터베이스 fallback
+        if (redisValues == null || redisValues.stream().allMatch(Objects::isNull) ||
+                redisValues.stream().anyMatch(value -> value == null || value.trim().isEmpty())) {
+            Optional<StockTick> latestTick = stockTickRepository.findByStock(stock);
+            if (latestTick.isEmpty()) {
+                return StockConverter.toMyStockInfluenceResponseFault(stock, maxImpactRate, newsCount);
+            }
+            return StockConverter.toMyStockInfluenceResponseFallBack(stock, latestTick.get(), maxImpactRate, newsCount);
+        }
+        return StockConverter.toMyStockInfluenceResponse(stock, redisValues, maxImpactRate, newsCount);
     }
 }

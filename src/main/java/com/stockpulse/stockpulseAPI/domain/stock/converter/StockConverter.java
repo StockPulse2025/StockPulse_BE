@@ -154,6 +154,36 @@ public class StockConverter {
     }
 
     public static StockResponseDTO.MyStockInfluenceResponse toMyStockInfluenceResponse(
+            Stock stock, List<String> values, BigDecimal maxImpactRate, int newsCount) {
+        return StockResponseDTO.MyStockInfluenceResponse.builder()
+                .stockId(stock.getId())
+                .stockName(stock.getName())
+                .symbol(stock.getSymbol())
+                .imageUrl(stock.getImageUrl())
+                .currentPrice(new BigDecimal(values.get(0)))
+                .changeRate(new BigDecimal(values.get(1)))
+                .changeAmount(new BigDecimal(values.get(2)))
+                .predictInfluenceScore(maxImpactRate)
+                .relatedIssueCount(newsCount)
+                .build();
+    }
+
+    public static StockResponseDTO.MyStockInfluenceResponse toMyStockInfluenceResponseFallBack(
+            Stock stock, StockTick latestTick, BigDecimal maxImpactRate, int newsCount) {
+        return StockResponseDTO.MyStockInfluenceResponse.builder()
+                .stockId(stock.getId())
+                .stockName(stock.getName())
+                .symbol(stock.getSymbol())
+                .imageUrl(stock.getImageUrl())
+                .currentPrice(latestTick.getClosePrice())
+                .changeRate(latestTick.getChangeRate())
+                .changeAmount(latestTick.getChangeAmount())
+                .predictInfluenceScore(maxImpactRate)
+                .relatedIssueCount(newsCount)
+                .build();
+    }
+
+    public static StockResponseDTO.MyStockInfluenceResponse toMyStockInfluenceResponseFault(
             Stock stock, BigDecimal maxImpactRate, int newsCount) {
         return StockResponseDTO.MyStockInfluenceResponse.builder()
                 .stockId(stock.getId())

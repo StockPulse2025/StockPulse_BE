@@ -138,12 +138,11 @@ public class StockResponseDTO {
         private String symbol;
         private String imageUrl;
 
-        //Redis에서 조회할것들
         private BigDecimal currentPrice;
         private BigDecimal changeRate;
         private BigDecimal changeAmount;
 
-        private BigDecimal predictInfluenceScore; // 오늘 발행된 뉴스 중 최대 영향도
-        private Integer relatedIssueCount; // 오늘 발행된 관련 뉴스 갯수
+        private BigDecimal predictInfluenceScore;
+        private Integer relatedIssueCount;
     }
 }
