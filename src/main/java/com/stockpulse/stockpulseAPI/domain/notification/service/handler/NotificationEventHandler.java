@@ -1,6 +1,6 @@
 package com.stockpulse.stockpulseAPI.domain.notification.service.handler;
 
-import com.stockpulse.stockpulseAPI.domain.member.entity.MemberCreatedEvent;
+import com.stockpulse.stockpulseAPI.domain.member.service.event.MemberCreatedEvent;
 import com.stockpulse.stockpulseAPI.domain.notification.service.NotificationService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
