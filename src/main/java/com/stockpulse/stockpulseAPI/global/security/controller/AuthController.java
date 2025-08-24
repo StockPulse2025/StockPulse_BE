@@ -6,6 +6,7 @@ import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.SuccessStatus;
 import com.stockpulse.stockpulseAPI.global.security.authDTO.AuthResponseDTO;
 import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Tag(name = "OAuth2", description = "OAuth2 API")
 public class AuthController {
 
     private final AuthService authService;
