@@ -127,4 +127,22 @@ public class StockResponseDTO {
         private StockRequestDTO.ChartPeriodType period;
         private List<StockCandleDTO> stockCandleDataList;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyStockInfluenceResponse{
+        private Long stockId;
+        private String stockName;
+        private String symbol;
+        private String imageUrl;
+
+        private BigDecimal currentPrice;
+        private BigDecimal changeRate;
+        private BigDecimal changeAmount;
+
+        private BigDecimal predictInfluenceScore;
+        private Integer relatedIssueCount;
+    }
 }

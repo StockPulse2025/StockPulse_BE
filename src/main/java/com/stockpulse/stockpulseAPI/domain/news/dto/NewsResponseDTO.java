@@ -13,6 +13,23 @@ public class NewsResponseDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class MyLatestNewsDTO {
+        private Long newsId;
+        private String newsTitle;
+        private String newsImage;
+        private String press;
+        private LocalDateTime publishedDate;
+        private Sentiment sentiment;
+        private Long stockId;
+        private String stockName;
+        private String stockImage;
+        private BigDecimal influenceScore;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class NewsTimePointDTO {
         @Setter
         private Integer rank;

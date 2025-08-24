@@ -104,4 +104,22 @@ public class NewsConverter {
                 .influenceScore(impact.getImpactRate())
                 .build();
     }
+
+    public static NewsResponseDTO.MyLatestNewsDTO toMyLatestNewsDTO(
+            News news, Stock stock, Impact impact, Sentiment sentiment){
+        return NewsResponseDTO.MyLatestNewsDTO.builder()
+                .newsId(news.getId())
+                .newsTitle(news.getTitle())
+                .newsImage(news.getImage())
+                .press(news.getPress())
+                .publishedDate(news.getPublishedDate())
+                .publishedDate(news.getPublishedDate())
+                .sentiment(sentiment)
+                .stockId(stock.getId())
+                .stockName(stock.getName())
+                .stockImage(stock.getImageUrl())
+                .influenceScore(impact.getImpactRate())
+                .build();
+
+    }
 }

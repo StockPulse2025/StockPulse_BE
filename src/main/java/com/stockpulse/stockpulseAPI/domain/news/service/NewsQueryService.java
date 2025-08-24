@@ -12,6 +12,8 @@ import com.stockpulse.stockpulseAPI.domain.news.entity.Sentiment;
 import com.stockpulse.stockpulseAPI.domain.news.repository.ImpactRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.MemberScrapNewsRepository;
 import com.stockpulse.stockpulseAPI.domain.news.repository.NewsRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberFavoriteStock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberOwnStock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.StockTick;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockTickRepository;
@@ -29,8 +31,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.stockpulse.stockpulseAPI.domain.news.converter.NewsConverter.*;
 
@@ -191,6 +194,42 @@ public class NewsQueryService {
             throw new NewsHandler(ErrorStatus.GEMINI_NOT_WORK);
         }
     }
+
+    public List<NewsResponseDTO.MyLatestNewsDTO> getMyLatestNews(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        List<Stock> stockList = Stream.concat(
+                member.getMemberFavoriteStockList().stream().map(MemberFavoriteStock::getStock),
+                member.getMemberOwnStockList().stream().map(MemberOwnStock::getStock)
+        ).distinct().collect(Collectors.toList());
+        
+        Set<Stock> stockSet = new HashSet<>(stockList);
+        
+        if (stockList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        Pageable pageable = PageRequest.of(0, 10);
+        List<News> latestNews = newsRepository.findLatestNewsByStocks(stockList, pageable);
+        
+        return latestNews.stream()
+                .map(news -> {
+                    
+                    Impact maxImpact = news.getImpacts().stream()
+                            .filter(impact -> stockSet.contains(impact.getStock()))
+                            .max(Comparator.comparing(impact -> impact.getImpactRate().abs()))
+                            .orElse(null);
+                    
+                    Sentiment sentiment = maxImpact != null ? determineSentiment(maxImpact) : Sentiment.NEUTRAL;
+                    
+                    Stock maxImpactStock = maxImpact != null ? maxImpact.getStock() : null;
+                    return toMyLatestNewsDTO(news, maxImpactStock, maxImpact, sentiment);
+                })
+                .collect(Collectors.toList());
+    }
+
 
     private Sentiment determineSentiment(Impact impact) {
         BigDecimal rate = impact.getImpactRate();

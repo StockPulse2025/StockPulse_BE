@@ -4,6 +4,7 @@ import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.enums.ChartPeriodType;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.enums.MyStockType;
 import com.stockpulse.stockpulseAPI.domain.stock.service.StockCommandService;
 import com.stockpulse.stockpulseAPI.domain.stock.service.StockQueryService;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
@@ -134,5 +135,24 @@ public class StockController {
         List<NewsResponseDTO.NewsTimePointDTO> result
                 = stockQueryService.getNewsTimePoint(stockId, period, date);
         return ApiResponse.onSuccess(result);
+    }
+
+
+    @Operation(
+            summary = "내 종목 주가 변동률 예측 조회 API",
+            description = """
+    오늘 발행된 뉴스를 기준으로 내 종목(관심, 보유, 관심/보유 전체)의 예측 주가 변동률을 반환합니다.
+    - 관심/보유 전체(ALL): 예측 변동률 절댓값 기준 상위 5개 종목에 대해서 반환합니다.
+    - 관심(FAVORITE), 보유(OWN): 해당하는 모든 종목들의 결과를 반환합니다.
+    """
+    )
+    @GetMapping("/prediction")
+    public ApiResponse<List<StockResponseDTO.MyStockInfluenceResponse>> getStockPrediction(
+            @AuthUser Long memberId,
+            @RequestParam("myStockType") MyStockType myStockType
+    ) {
+        List<StockResponseDTO.MyStockInfluenceResponse> response
+                = stockQueryService.getMyStockInfluenceResponse(memberId, myStockType);
+        return ApiResponse.onSuccess(response);
     }
 }
