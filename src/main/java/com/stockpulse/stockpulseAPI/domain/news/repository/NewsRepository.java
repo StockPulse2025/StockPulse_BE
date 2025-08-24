@@ -1,6 +1,8 @@
 package com.stockpulse.stockpulseAPI.domain.news.repository;
 
 import com.stockpulse.stockpulseAPI.domain.news.entity.News;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +30,11 @@ public interface NewsRepository extends JpaRepository<News, Long>, NewsRepositor
     List<News> findByStockAndDateRange(@Param("stockId") Long stockId, 
                                        @Param("startDate") LocalDateTime startDate, 
                                        @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT DISTINCT n FROM News n " +
+            "JOIN FETCH n.impacts i " +
+            "WHERE i.stock IN :stocks " +
+            "ORDER BY n.publishedDate DESC")
+    List<News> findLatestNewsByStocks(@Param("stocks") List<Stock> stocks, Pageable pageable);
+
 }

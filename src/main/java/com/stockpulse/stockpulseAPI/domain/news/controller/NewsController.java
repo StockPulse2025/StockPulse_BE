@@ -252,4 +252,18 @@ public class NewsController {
         NewsResponseDTO.newsSummaryDTO summary = newsQueryService.summaryNews(newsId);
         return ApiResponse.onSuccess(summary);
     }
+
+    @Operation(
+            summary = "내 종목 최신 뉴스 조회 API",
+            description = """
+    내 종목 (보유/ 관심) 들과 연관있는 뉴스를 최신순으로 10개 조회합니다.
+    """
+    )
+    @GetMapping("/my-latest")
+    public ApiResponse<List<NewsResponseDTO.MyLatestNewsDTO>> getMyLatestNews(
+            @AuthUser Long memberId
+    ) {
+        List<NewsResponseDTO.MyLatestNewsDTO> result = newsQueryService.getMyLatestNews(memberId);
+        return ApiResponse.onSuccess(result);
+    }
 }
