@@ -38,4 +38,12 @@ public interface ImpactRepository extends JpaRepository<Impact, Long> {
     List<Impact> findByNews(News news);
     
     Optional<Impact> findByNewsAndStock(News news, Stock stock);
+    
+    @Query("""
+        SELECT i FROM Impact i 
+        JOIN FETCH i.news n 
+        WHERE i.stock = :stock 
+        AND DATE(n.publishedDate) = CURRENT_DATE
+        """)
+    List<Impact> findTodayImpactsByStock(@Param("stock") Stock stock);
 }

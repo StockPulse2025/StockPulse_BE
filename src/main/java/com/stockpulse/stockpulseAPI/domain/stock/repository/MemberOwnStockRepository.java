@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberOwnStockRepository extends JpaRepository<MemberOwnStock, Long> {
@@ -15,4 +16,7 @@ public interface MemberOwnStockRepository extends JpaRepository<MemberOwnStock, 
     Optional<MemberOwnStock> findByMemberAndStock(@Param("member") Member member, @Param("stock") Stock stock);
     
     boolean existsByMemberAndStock(Member member, Stock stock);
+    
+    @Query("SELECT mos.stock FROM MemberOwnStock mos WHERE mos.member = :member")
+    List<Stock> findStocksByMember(@Param("member") Member member);
 }

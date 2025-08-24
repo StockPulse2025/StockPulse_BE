@@ -152,4 +152,19 @@ public class StockConverter {
                 .stockCandleDataList(stockCandleDTOS)
                 .build();
     }
+
+    public static StockResponseDTO.MyStockInfluenceResponse toMyStockInfluenceResponse(
+            Stock stock, BigDecimal maxImpactRate, int newsCount) {
+        return StockResponseDTO.MyStockInfluenceResponse.builder()
+                .stockId(stock.getId())
+                .stockName(stock.getName())
+                .symbol(stock.getSymbol())
+                .imageUrl(stock.getImageUrl())
+                .currentPrice(BigDecimal.ZERO)
+                .changeRate(BigDecimal.ZERO)
+                .changeAmount(BigDecimal.ZERO)
+                .predictInfluenceScore(maxImpactRate)
+                .relatedIssueCount(newsCount)
+                .build();
+    }
 }
