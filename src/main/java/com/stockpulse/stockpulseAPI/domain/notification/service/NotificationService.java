@@ -20,7 +20,10 @@ import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockR
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -67,8 +70,10 @@ public class NotificationService {
     }
 
 
-    @EventListener
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // 새로운 트랜잭션을 시작하도록 변경@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+//    @EventListener
+//    @Transactional
     public void handleImpactSavedEvent(ImpactSavedEvent event) {
         notification(event.getImpacts());
     }

@@ -5,6 +5,7 @@ import com.stockpulse.stockpulseAPI.domain.notification.service.NotificationServ
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
 import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notification")
+@Tag(name = "Notification", description = "알림 이력 조회 관련 API")
 public class NotificationController {
     private final NotificationService notificationService;
 
