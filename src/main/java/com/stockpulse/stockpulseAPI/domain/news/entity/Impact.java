@@ -31,4 +31,8 @@ public class Impact extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
+
+    public void updateImpactRate(BigDecimal newImpactRate) {
+        this.impactRate = newImpactRate;
+    }
 }

@@ -98,12 +98,20 @@ public class NewsCommandService {
         List<Impact> impacts = new ArrayList<>();
         for (NewsRequestDTO.NewsRelatedStocksDataDTO data : request) {
             stockRepository.findBySymbol(data.getSymbol()).ifPresent(stock -> {
-                Impact newImpact = Impact.builder()
-                        .stock(stock)
-                        .news(news)
-                        .impactRate(data.getInfluenceScore())
-                        .build();
-                impacts.add(newImpact);
+                Optional<Impact> existingImpact = impactRepository.findByNewsAndStock(news, stock);
+                
+                Impact impact;
+                if (existingImpact.isPresent()) {
+                    impact = existingImpact.get();
+                    impact.updateImpactRate(data.getInfluenceScore());
+                } else {
+                    impact = Impact.builder()
+                            .stock(stock)
+                            .news(news)
+                            .impactRate(data.getInfluenceScore())
+                            .build();
+                }
+                impacts.add(impact);
             });
         }
         impactRepository.saveAll(impacts);
