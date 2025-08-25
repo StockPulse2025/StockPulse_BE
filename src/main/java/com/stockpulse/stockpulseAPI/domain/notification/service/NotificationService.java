@@ -101,7 +101,9 @@ public class NotificationService {
                     .orElseThrow(() -> new IllegalArgumentException("종목에 관심한 사용가 존재하지 않습니다."));
             for (Member member : members) {
                 // 3. 사용자의 알림 세팅 조회
-                NotificationSetting setting = notificationSettingRepository.findByMember(member).orElseThrow(() -> new IllegalArgumentException("알림 세팅이 존재하지 않습니다."));
+                NotificationSetting setting
+                        = notificationSettingRepository.findByMember(member).orElseThrow(()
+                        -> new IllegalArgumentException("알림 세팅이 존재하지 않습니다."));
 
                 boolean sendNotification = false;
 
