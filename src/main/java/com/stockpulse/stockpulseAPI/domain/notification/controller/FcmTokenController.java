@@ -3,6 +3,7 @@ package com.stockpulse.stockpulseAPI.domain.notification.controller;
 import com.stockpulse.stockpulseAPI.domain.notification.dto.FcmTokenRequestDto;
 import com.stockpulse.stockpulseAPI.domain.notification.service.FcmTokenservice;
 import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import static org.springframework.web.servlet.function.ServerResponse.ok;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/fcm")
+@Tag(name = "FCM 알림 토큰", description = "FCM 알림 토큰 API")
 public class FcmTokenController {
 
     // TODO : service 클래스

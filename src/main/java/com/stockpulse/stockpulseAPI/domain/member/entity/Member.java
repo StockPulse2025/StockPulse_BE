@@ -1,6 +1,7 @@
 package com.stockpulse.stockpulseAPI.domain.member.entity;
 
 import com.stockpulse.stockpulseAPI.domain.common.BaseEntity;
+import com.stockpulse.stockpulseAPI.domain.member.service.event.MemberEntityListener;
 import com.stockpulse.stockpulseAPI.domain.news.entity.MemberScrapNews;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.FcmToken;
 import com.stockpulse.stockpulseAPI.domain.notification.entity.Notification;
