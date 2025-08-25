@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -264,6 +265,26 @@ public class NewsController {
             @AuthUser Long memberId
     ) {
         List<NewsResponseDTO.MyLatestNewsDTO> result = newsQueryService.getMyLatestNews(memberId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(
+            summary = "특정 종목 최신 뉴스 조회 API",
+            description = """
+    특정 종목과 연관있는 뉴스를 조회합니다.
+    - Parameter:
+      - `page`: 페이지 번호 (1부터 시작)
+      - `size`: 한 페이지당 게시글 개수 (기본값: 10)
+    """
+    )
+    @GetMapping("/{stockId}/latest")
+    public ApiResponse<List<NewsResponseDTO.NewsDTO>> getStockLatestNews(
+            @AuthUser Long memberId,
+            @PathVariable("stockId") Long stockId,
+            @RequestParam(name = "page", defaultValue = "1") @Min(1)Integer page,
+            @RequestParam(name = "size", defaultValue = "10") @Min(1)Integer size
+    ) {
+        List<NewsResponseDTO.NewsDTO> result = newsQueryService.getStockLatestNews(stockId, memberId, page, size);
         return ApiResponse.onSuccess(result);
     }
 }

@@ -46,4 +46,12 @@ public interface ImpactRepository extends JpaRepository<Impact, Long> {
         AND DATE(n.publishedDate) = CURRENT_DATE
         """)
     List<Impact> findTodayImpactsByStock(@Param("stock") Stock stock);
+
+    @Query("""
+        SELECT i FROM Impact i 
+        JOIN FETCH i.news n 
+        WHERE i.stock = :stock 
+        ORDER BY n.publishedDate DESC
+        """)
+    List<Impact> findByStockOrderByNewsPublishedDateDesc(@Param("stock") Stock stock, Pageable pageable);
 }

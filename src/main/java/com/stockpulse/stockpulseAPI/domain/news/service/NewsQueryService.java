@@ -16,10 +16,12 @@ import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberFavoriteStock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberOwnStock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.StockTick;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockTickRepository;
 import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.MemberHandler;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.NewsHandler;
+import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.StockHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +46,7 @@ public class NewsQueryService {
 
     private final NewsRepository newsRepository;
     private final MemberRepository memberRepository;
+    private final StockRepository stockRepository;
     private final StockTickRepository stockTickRepository;
     private final ImpactRepository impactRepository;
     private final MemberScrapNewsRepository memberScrapNewsRepository;
@@ -226,6 +229,38 @@ public class NewsQueryService {
                     
                     Stock maxImpactStock = maxImpact != null ? maxImpact.getStock() : null;
                     return toMyLatestNewsDTO(news, maxImpactStock, maxImpact, sentiment);
+                })
+                .collect(Collectors.toList());
+    }
+
+    // 특정 종목의 최신 뉴스 조회
+    public List<NewsResponseDTO.NewsDTO> getStockLatestNews(Long stockId, Long memberId, int page, int size) {
+        Stock stock = stockRepository.findById(stockId)
+                .orElseThrow(() -> new StockHandler(ErrorStatus.STOCK_NOT_FOUND));
+        
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+                
+        Pageable pageable = PageRequest.of(page - 1, size);
+        List<Impact> impacts = impactRepository.findByStockOrderByNewsPublishedDateDesc(stock, pageable);
+        
+        return impacts.stream()
+                .map(Impact::getNews)
+                .distinct()
+                .map(news -> {
+                    boolean scrapped = memberScrapNewsRepository.findByMemberAndNews(member, news).isPresent();
+                    
+                    Impact targetStockImpact = news.getImpacts().stream()
+                            .filter(impact -> impact.getStock().equals(stock))
+                            .findFirst()
+                            .orElse(null);
+                    
+                    Sentiment sentiment = targetStockImpact != null ? determineSentiment(targetStockImpact) : Sentiment.NEUTRAL;
+                    
+                    NewsResponseDTO.NewsDetailStockDTO stockInfo = targetStockImpact != null ? 
+                            createStockInfoWithTick(stock, targetStockImpact, 1) : null;
+                    
+                    return toNewsDTO(news, scrapped, sentiment, stockInfo);
                 })
                 .collect(Collectors.toList());
     }
