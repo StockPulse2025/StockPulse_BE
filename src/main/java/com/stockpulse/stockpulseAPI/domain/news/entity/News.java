@@ -31,7 +31,7 @@ public class News extends BaseEntity {
     @Column(nullable = false, length = 300, unique = true)
     private String url;
 
-    @Column(length = 2048)
+    @Lob
     private String content;
 
     @Column(nullable = false)
