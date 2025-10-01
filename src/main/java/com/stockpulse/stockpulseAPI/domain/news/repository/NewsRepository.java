@@ -17,6 +17,7 @@ public interface NewsRepository extends JpaRepository<News, Long>, NewsRepositor
     boolean existsByUrl(String url);
 
     Optional<News> findByUrl(String url);
+    Optional<News> findByContent(String content);
 
     @Query("SELECT n FROM News n LEFT JOIN FETCH n.impacts WHERE n.id = :id")
     Optional<News> findByIdWithImpacts(@Param("id") Long id);
