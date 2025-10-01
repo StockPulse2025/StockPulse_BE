@@ -69,8 +69,8 @@ public class NewsCommandService {
     }
 
     private void processNewsData(NewsRequestDTO.NewsDataPostRequestDTO request) {
-        Optional<News> existingNews = newsRepository.findByUrl(request.getNewsUrl());
-        
+        Optional<News> existingNews = newsRepository.findByContent(request.getContent());
+
         News news;
         if(existingNews.isEmpty()){
             news = createNewsFromRequest(request);
@@ -78,7 +78,6 @@ public class NewsCommandService {
         } else {
             news = existingNews.get();
         }
-        
         saveImpactFromNewsData(news, request.getRelatedStocks());
     }
 
