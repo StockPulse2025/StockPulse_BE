@@ -96,7 +96,13 @@ public class NewsCommandService {
     private void saveImpactFromNewsData(News news, List<NewsRequestDTO.NewsRelatedStocksDataDTO> request) {
         List<Impact> impacts = new ArrayList<>();
         for (NewsRequestDTO.NewsRelatedStocksDataDTO data : request) {
-            stockRepository.findBySymbol(data.getSymbol()).ifPresent(stock -> {
+
+            String symbol = data.getSymbol();
+            if (symbol.length() != 6) {
+                symbol = String.format("%06d", Integer.parseInt(symbol));
+            }
+
+            stockRepository.findBySymbol(symbol).ifPresent(stock -> {
                 Optional<Impact> existingImpact = impactRepository.findByNewsAndStock(news, stock);
                 
                 Impact impact;
