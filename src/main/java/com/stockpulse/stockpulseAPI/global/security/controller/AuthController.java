@@ -5,6 +5,7 @@ import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
 import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.SuccessStatus;
 import com.stockpulse.stockpulseAPI.global.security.authDTO.AuthResponseDTO;
 import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
+import com.stockpulse.stockpulseAPI.global.security.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
