@@ -4,6 +4,7 @@ import com.stockpulse.stockpulseAPI.domain.token.service.TokenService;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
 import com.stockpulse.stockpulseAPI.global.security.authDTO.AuthResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/token")
+@Tag(name = "Token", description = "JWT 토큰 관련 API")
 public class TokenController {
 
     private final TokenService tokenService;
