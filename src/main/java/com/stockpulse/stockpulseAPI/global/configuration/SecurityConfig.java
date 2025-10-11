@@ -24,12 +24,9 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private static final String ALLOW_AUTH_URL = "/api/auth/**";
     private static final String ALLOW_OPEN_API = "/api/open-api/**";
 
     private static final String[] SECURITY_ALLOW_ARRAY = { //인증 없이 접근 가능한 엔드 포인트
-            ALLOW_AUTH_URL,
             ALLOW_OPEN_API,
             "/error",
             "/swagger-ui/**",
@@ -47,7 +44,8 @@ public class SecurityConfig {
             "/ws-stock/**",
             "/ws-stock",
             "/favicon.ico",
-            "/api/v1/news/pipeline/**"
+            "/api/v1/news/pipeline/**",
+            "/api/auth/kakao**"
     };
 
     private final JwtRequestFilter jwtRequestFilter;

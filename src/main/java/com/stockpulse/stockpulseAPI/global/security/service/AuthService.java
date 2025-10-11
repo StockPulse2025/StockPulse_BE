@@ -1,4 +1,4 @@
-package com.stockpulse.stockpulseAPI.global.security.controller;
+package com.stockpulse.stockpulseAPI.global.security.service;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
 import com.stockpulse.stockpulseAPI.domain.member.repository.MemberRepository;
