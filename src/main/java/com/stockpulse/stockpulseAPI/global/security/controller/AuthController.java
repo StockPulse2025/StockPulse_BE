@@ -25,7 +25,7 @@ public class AuthController {
     @Operation(
             summary = "카카오 로그인 API (인가 코드 → JWT 발급)",
             description = "회원가입과 로그인을 한번에 처리하는 카카오 로그인 API 입니다. 인가코드를 전달하면 JWT 토큰이 발급됩니다.")
-    @GetMapping("/kakao")
+    @PostMapping("/kakao")
     public ApiResponse<AuthResponseDTO.OAuthResponse> kakaoLoginTest(@RequestParam("code") String code) {
         return ApiResponse.of(SuccessStatus.USER_LOGIN_OK, authService.kakaoLoginTest(code));
     }
@@ -34,7 +34,7 @@ public class AuthController {
     @Operation(
             summary = "카카오 로그인 API (Access Token → JWT 발급)",
             description = "카카오 Access Token을 전달하면 JWT 토큰이 발급됩니다.")
-    @GetMapping("/login/kakao")
+    @PostMapping("/login/kakao")
     public ApiResponse<AuthResponseDTO.OAuthResponse> kakaoLogin(@RequestParam("access_token") String token) {
         return ApiResponse.of(SuccessStatus.USER_LOGIN_OK, authService.kakaoLogin(token));
     }*/
