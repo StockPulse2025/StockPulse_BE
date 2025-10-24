@@ -86,19 +86,19 @@ public class MemberService {
                 .collect(Collectors.toList());
     }
 
-    public List<PostResponseDTO.SummaryDTO> getPublishedPosts(Long userId) {
+    public List<PostResponseDTO.MemberPostPreviewDTO> getPublishedPosts(Long userId) {
         List<Post> posts = memberRepository.findPostsWithDetailByUserId(userId);
 
         return posts.stream()
-                .map(PostResponseDTO.SummaryDTO::from)
+                .map(PostResponseDTO.MemberPostPreviewDTO::from)
                 .collect(Collectors.toList());
     }
 
-    public List<PostResponseDTO.SummaryDTO> getCommentedPosts(Long userId) {
+    public List<PostResponseDTO.MemberPostPreviewDTO> getCommentedPosts(Long userId) {
         List<Comment> comments = memberRepository.findPostsCommentedByUserId(userId);
         return comments.stream()
                 .map(Comment::getPost)
-                .map(PostResponseDTO.SummaryDTO::from)
+                .map(PostResponseDTO.MemberPostPreviewDTO::from)
                 .collect(Collectors.toList());
     }
 

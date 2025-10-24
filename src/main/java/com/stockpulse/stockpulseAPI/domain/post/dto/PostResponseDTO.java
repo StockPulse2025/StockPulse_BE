@@ -1,8 +1,10 @@
 package com.stockpulse.stockpulseAPI.domain.post.dto;
 
 import com.stockpulse.stockpulseAPI.domain.post.entity.Post;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class PostResponseDTO {
@@ -25,12 +27,9 @@ public class PostResponseDTO {
         private String newsPublishedDate;
         private String newsPublisher;
 
-        private String stockImageUrl;
-        private String stockName;
-        private Long stockPrice;
-        private Float stockChangeRate;
+        private StockResponseDTO.StockDetailDTO stockDetail;
 
-        public static SummaryDTO from(Post post) {
+        public static SummaryDTO from(Post post, StockResponseDTO.StockDetailDTO stockDetail) {
             String summary = post.getContent().length() <= 40 ?
                     post.getContent() :
                     post.getContent().substring(0, 40) + "...";
@@ -47,8 +46,46 @@ public class PostResponseDTO {
                     .newsTitle(post.getNews().getTitle())
                     .newsPublishedDate(post.getNews().getPublishedDate().toString())
                     .newsPublisher(post.getNews().getPress())
-                    .stockImageUrl(post.getStock().getImageUrl())
-                    .stockName(post.getStock().getName())
+                    .stockDetail(stockDetail)
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MemberPostPreviewDTO{
+        private Long postId;
+        private String title;
+        private String contentSummary;
+        private String createdAt;
+        private String author;
+        private Integer commentCount;
+        private Integer voteCount;
+
+        private String newsImageUrl;
+        private String newsTitle;
+        private String newsPublishedDate;
+        private String newsPublisher;
+
+        public static MemberPostPreviewDTO from(Post post) {
+            String summary = post.getContent().length() <= 40 ?
+                    post.getContent() :
+                    post.getContent().substring(0, 40) + "...";
+
+            return MemberPostPreviewDTO.builder()
+                    .postId(post.getId())
+                    .title(post.getTitle())
+                    .contentSummary(summary)
+                    .createdAt(post.getCreatedAt().toString())
+                    .author(post.getMember().getNickname())
+                    .commentCount(post.getCommentCount())
+                    .voteCount(post.getVoteCount())
+                    .newsImageUrl(post.getNews().getImage())
+                    .newsTitle(post.getNews().getTitle())
+                    .newsPublishedDate(post.getNews().getPublishedDate().toString())
+                    .newsPublisher(post.getNews().getPress())
                     .build();
         }
     }

@@ -64,6 +64,7 @@ public class MemberController {
         );
     }
 
+    @Operation(summary = "사용자 스크랩 뉴스 조회")
     @GetMapping("/news/scrap")
     public ResponseEntity<ApiResponse<List<NewsResponseDTO.NewsOverviewDTO>>> getScrapNews(@AuthUser Long userId) {
         List<NewsResponseDTO.NewsOverviewDTO> response = memberService.getScrapNews(userId);
@@ -72,18 +73,20 @@ public class MemberController {
         );
     }
 
+    @Operation(summary = "사용자 작성 게시글 조회")
     @GetMapping("/post/publish")
-    public ResponseEntity<ApiResponse<List<PostResponseDTO.SummaryDTO>>> getPublishedPosts(@AuthUser Long userId) {
-        List<PostResponseDTO.SummaryDTO> response = memberService.getPublishedPosts(userId);
+    public ResponseEntity<ApiResponse<List<PostResponseDTO.MemberPostPreviewDTO>>> getPublishedPosts(@AuthUser Long userId) {
+        List<PostResponseDTO.MemberPostPreviewDTO> response = memberService.getPublishedPosts(userId);
 
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(response)
         );
     }
 
+    @Operation(summary = "사용자가 댓글 단 게시물  조회")
     @GetMapping("/post/comment")
-    public ResponseEntity<ApiResponse<List<PostResponseDTO.SummaryDTO>>> getCommentedPosts(@AuthUser Long userId) {
-        List<PostResponseDTO.SummaryDTO> response = memberService.getCommentedPosts(userId);
+    public ResponseEntity<ApiResponse<List<PostResponseDTO.MemberPostPreviewDTO>>> getCommentedPosts(@AuthUser Long userId) {
+        List<PostResponseDTO.MemberPostPreviewDTO> response = memberService.getCommentedPosts(userId);
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(response)
         );
