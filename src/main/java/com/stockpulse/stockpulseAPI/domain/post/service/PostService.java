@@ -24,6 +24,8 @@ import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockTickRepository;
 import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
 import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.MemberHandler;
+import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.NewsHandler;
+import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.TempHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -292,6 +294,10 @@ public class PostService {
         Member member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("Member not found")); // TODO : 커스텀 Exception 추가 필요
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found")); // TODO : 커스텀 Exception 추가 필요
         Vote vote = post.getVote();
+
+        if (voteRecordRepository.existsByVoteAndMember(vote, member)) {
+            throw new TempHandler(ErrorStatus.DUPLICATE_VOTE);
+        }
 
         VoteOption voteOption;
         switch (voteParticipationDTO.getVoteType()) {
