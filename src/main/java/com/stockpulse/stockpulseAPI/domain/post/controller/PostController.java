@@ -31,7 +31,6 @@ public class PostController {
 
     private final PostService postService;
 
-
     // TODO : 게시글 목록 조회
     @Operation(summary = "게시글 목록 조회", description = "게시글 목록을 조회합니다.")
     @GetMapping("/list")
@@ -105,7 +104,7 @@ public class PostController {
     }
 
     // 게시글 삭제
-    @DeleteMapping("/delete")
+    @DeleteMapping("/post/delete")
     @Operation(
             summary = "게시글 삭제",
             description = "삭제할 게시물들의 ID를 전달해주세요. 본인이 작성한 게시글이 아니라면 삭제가 불가능합니다.")
@@ -116,15 +115,27 @@ public class PostController {
         return ApiResponse.onSuccess("게시글 삭제가 완료 되었습니다.");
     }
 
+    // 댓글 삭제
+    @DeleteMapping("/comment/delete")
+    @Operation(
+            summary = "댓글 삭제",
+            description = "삭제할 댓글들의 ID를 전달해주세요. 본인이 작성한 댓글이 아니라면 삭제가 불가능합니다.")
+    public ApiResponse<String> deleteComments(
+            @RequestBody PostRequestDto.DeleteCommentDTO deleteTargetComments,
+            @AuthUser Long memberId) {
+        postService.deleteComments(deleteTargetComments,memberId);
+        return ApiResponse.onSuccess("댓글 삭제가 완료 되었습니다.");
+    }
+
     // 댓글 등록
     @PostMapping("/comment/{postId}")
     @Operation(summary = "댓글 등록", description = "댓글을 등록합니다.")
     public ResponseEntity<ApiResponse<PostResponseDTO.CommentDTO>> comment(
             @AuthUser Long userId,
-            @PathVariable Long postId,
-            @RequestBody String content
-    ) {
-        PostResponseDTO.CommentDTO response = postService.createComment(userId, postId, content);
+            @PathVariable("postId") Long postId,
+            @RequestBody PostRequestDto.CreateCommentDTO dto
+            ) {
+        PostResponseDTO.CommentDTO response = postService.createComment(userId, postId, dto.getContent());
 
         return ResponseEntity
                 .created(URI.create("/api/post/" + postId))
@@ -198,8 +209,8 @@ public class PostController {
             }
     )
     public ResponseEntity<ApiResponse<PostResponseDTO.VoteDTO>> vote(
-            @AuthUser long userId,
-            @PathVariable long postId,
+            @AuthUser Long userId,
+            @PathVariable("postId") Long postId,
             @RequestBody PostRequestDto.VoteParticipationDTO voteParticipationDTO) {
         PostResponseDTO.VoteDTO response = postService.vote(userId, postId, voteParticipationDTO);
         return ResponseEntity
