@@ -21,4 +21,9 @@ public class PostRequestDto {
     public static class DeletePostDTO {
         private List<Long> postIds;
     }
+
+    @Getter
+    public static class DeleteCommentDTO {
+        private List<Long> commentIds;
+    }
 }

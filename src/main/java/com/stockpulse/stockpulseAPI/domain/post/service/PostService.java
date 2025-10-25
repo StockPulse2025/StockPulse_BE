@@ -162,6 +162,20 @@ public class PostService {
     }
 
     @Transactional
+    public void deleteComments(PostRequestDto.DeleteCommentDTO deleteCommentDto, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        List<Comment> deleteTargetComments = commentRepository.findAllById(deleteCommentDto.getCommentIds());
+
+        List<Comment> commentsToDelete = deleteTargetComments.stream()
+                .filter(comment -> comment.getMember().equals(member))
+                .toList();
+
+        commentRepository.deleteAll(commentsToDelete);
+    }
+
+    @Transactional
     public Long createPost(Long userId, PostRequestDto dto) {
 
         Member member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("Member not found")); // TODO : 커스텀 Exception 추가 필요
