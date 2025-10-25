@@ -14,18 +14,30 @@ import com.stockpulse.stockpulseAPI.domain.post.repository.CommentRepository;
 import com.stockpulse.stockpulseAPI.domain.post.repository.PostRepository;
 import com.stockpulse.stockpulseAPI.domain.post.repository.VoteRecordRepository;
 import com.stockpulse.stockpulseAPI.domain.post.repository.VoteRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.StockTick;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberOwnStockRepository;
 import com.stockpulse.stockpulseAPI.domain.stock.repository.StockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.StockTickRepository;
 import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
+import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.MemberHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,8 +50,12 @@ public class PostService {
     private final VoteRepository voteRepository;
     private final VoteRecordRepository voteRecordRepository;
     private final CommentRepository commentRepository;
+    private final StockTickRepository stockTickRepository;
+    private final MemberFavoriteStockRepository memberFavoriteStockRepository;
+    private final MemberOwnStockRepository memberOwnStockRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public List<PostResponseDTO.SummaryDTO> getPostList(int page, int size, String sort) {
+    public List<PostResponseDTO.SummaryDTO> getPostList(int page, int size, String sort, Long memberId) {
         Sort sortOption;
 
         switch (sort.toLowerCase()) {
@@ -58,6 +74,9 @@ public class PostService {
 
         Page<Post> postPage = postRepository.findAll(pageable);
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
         return postPage.getContent().stream()
                 .map(post -> PostResponseDTO.SummaryDTO.builder()
                         .postId(post.getId())
@@ -75,13 +94,44 @@ public class PostService {
                         .newsPublishedDate(post.getNews().getPublishedDate().toString())
                         .newsPublisher(post.getNews().getPress())
 
-                        .stockImageUrl(post.getStock().getImageUrl())
-                        .stockName(post.getStock().getName())
-//                        .stockPrice(post.getStock().getPrice())
-//                        .stockChangeRate(post.getStock().getChangeRate())
+                        .stockDetail(
+                                createStockDetailDTO(
+                                        post.getStock(),
+                                        getStockDataFromRedis(post.getStock().getSymbol()),
+                                        memberFavoriteStockRepository.existsByMemberAndStock(member, post.getStock()),
+                                        memberOwnStockRepository.existsByMemberAndStock(member, post.getStock())
+                                )
+                        )
                         .build()
                 )
                 .collect(Collectors.toList());
+    }
+
+    private List<String> getStockDataFromRedis(String stockSymbol) {
+        try {
+            String redisKey = "stock:tick:" + stockSymbol;
+            HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+            List<String> fields
+                    = Arrays.asList("closePrice", "changeRate", "changeAmount","tradingValue","tradingValue");
+            return hashOps.multiGet(redisKey, fields);
+        } catch (Exception e) {
+            // Redis 연결 실패, 타임아웃 등 모든 예외 상황에서 null 반환
+            return null;
+        }
+    }
+
+    private StockResponseDTO.StockDetailDTO createStockDetailDTO(Stock stock, List<String> redisValues,
+                                                                 boolean isFavorite, boolean isOwned) {
+        // Redis 캐시 미스 시 데이터베이스 fallback
+        if (redisValues == null || redisValues.stream().allMatch(Objects::isNull) ||
+                redisValues.stream().anyMatch(value -> value == null || value.trim().isEmpty())) {
+            Optional<StockTick> latestTick = stockTickRepository.findByStock(stock);
+            if (latestTick.isEmpty()) {
+                return StockConverter.toStockDetailDTOFault(stock, isFavorite, isOwned);
+            }
+            return StockConverter.toStockDetailDTOFallBack(stock, latestTick.get(), isFavorite, isOwned);
+        }
+        return StockConverter.toStockDetailDTO(stock, redisValues, isFavorite, isOwned);
     }
 
     public NewsResponseDTO.PostPrefillDTO getPrefillNewsInfo(Long newsId) {
@@ -95,6 +145,20 @@ public class PostService {
                 .build();
 
         return response;
+    }
+
+    @Transactional
+    public void deletePosts(PostRequestDto.DeletePostDTO deletePostDto, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        List<Post> deleteTargetPosts = postRepository.findAllById(deletePostDto.getPostIds());
+
+        List<Post> postsToDelete = deleteTargetPosts.stream()
+                .filter(post -> post.getMember().equals(member))
+                .toList();
+
+        postRepository.deleteAll(postsToDelete);
     }
 
     @Transactional
@@ -165,13 +229,13 @@ public class PostService {
                 .press(post.getNews().getPress())
                 .isNewsScrapped(member.getMemberScrapNewsList().contains(post.getNews()))
                 .newsImageUrl(post.getNews().getImage())
-                .stockId(post.getStock().getId())
-                .stockName(post.getStock().getName())
-                // .stockPrice(post.getStock().getPrice())
-                // .stockChangeRate(post.getStock().getChangeRate())
-                .stockImageUrl(post.getStock().getImageUrl())
-                .isStockOwned(member.getMemberOwnStockList().contains(post.getStock()))
-                .isStockFavorite(member.getMemberFavoriteStockList().contains(post.getStock()))
+                .stockDetail(
+                        createStockDetailDTO(
+                        post.getStock(),
+                        getStockDataFromRedis(post.getStock().getSymbol()),
+                        memberFavoriteStockRepository.existsByMemberAndStock(member, post.getStock()),
+                        memberOwnStockRepository.existsByMemberAndStock(member, post.getStock())
+                ))
                 .voteSummary(PostResponseDTO.VoteDTO.builder()
                         .postId(post.getId())
                         .buy(post.getVote().getBuy())

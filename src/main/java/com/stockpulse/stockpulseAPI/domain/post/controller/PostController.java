@@ -46,8 +46,9 @@ public class PostController {
                             @ExampleObject(name = "댓글순", value = "comment", summary = "댓글 많은 순"),
                             @ExampleObject(name = "최신순", value = "latest", summary = "최신 작성 순")
                     })
-            @RequestParam("sort") String sort) {
-        List<PostResponseDTO.SummaryDTO> posts = postService.getPostList(page, size, sort);
+            @RequestParam("sort") String sort,
+            @AuthUser Long memberId) {
+        List<PostResponseDTO.SummaryDTO> posts = postService.getPostList(page, size, sort, memberId);
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.onSuccess(posts));
@@ -89,12 +90,6 @@ public class PostController {
                     schema = @Schema(implementation = PostRequestDto.class),
                     examples = @ExampleObject(value = "{\"newsId\": 13, \"title\": \"새로운 게시글 제목\", \"content\": \"게시글 내용입니다...\", \"stockId\": \"13\", \"requireVote\": true}")
             )))
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "댓글 성공적으로 등록됨",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostResponseDTO.CommentDTO.class),
-                            examples = @ExampleObject(value = "{\"isSuccess\":true,\"code\":\"201\",\"message\":\"Created\",\"result\":{\"postId\":101}}"))),
-    })
     @PostMapping("/write")
     public ResponseEntity<ApiResponse<Map<String,Long>>> write(
             @AuthUser Long userId,
@@ -107,6 +102,18 @@ public class PostController {
         return ResponseEntity
                 .created(location) // ← HTTP 201 + Location 헤더 자동 추가
                 .body(ApiResponse.onSuccess(Map.of("postId", postId))); // ← 바디는 통일된 구조
+    }
+
+    // 게시글 삭제
+    @DeleteMapping("/delete")
+    @Operation(
+            summary = "게시글 삭제",
+            description = "삭제할 게시물들의 ID를 전달해주세요. 본인이 작성한 게시글이 아니라면 삭제가 불가능합니다.")
+    public ApiResponse<String> deletePosts(
+            @RequestBody PostRequestDto.DeletePostDTO deleteTargetPosts,
+            @AuthUser Long memberId) {
+        postService.deletePosts(deleteTargetPosts,memberId);
+        return ApiResponse.onSuccess("게시글 삭제가 완료 되었습니다.");
     }
 
     // 댓글 등록
@@ -128,11 +135,12 @@ public class PostController {
     // TODO : 게시글 상세 조회
     @GetMapping("/{postId}")
     @Operation(summary = "게시글 상세 조회", description = "게시글 단건을 상세 조회합니다.")
-    public ResponseEntity<ApiResponse<PostResponseDTO.DetailDTO>> detail(@AuthUser Long userId, @PathVariable Long postId) {
+    public ApiResponse<PostResponseDTO.DetailDTO> detail(
+            @AuthUser Long userId, @PathVariable("postId") Long postId) {
+
         PostResponseDTO.DetailDTO response = postService.getPostDetail(userId, postId);
 
-        return ResponseEntity.ok()
-                .body(ApiResponse.onSuccess(response));
+        return ApiResponse.onSuccess(response);
     }
 
 
