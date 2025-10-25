@@ -2,6 +2,8 @@ package com.stockpulse.stockpulseAPI.domain.post.dto;
 
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class PostRequestDto {
     private Long newsId;
@@ -13,5 +15,10 @@ public class PostRequestDto {
     @Getter
     public static class VoteParticipationDTO {
         private Integer voteType;
+    }
+
+    @Getter
+    public static class DeletePostDTO {
+        private List<Long> postIds;
     }
 }

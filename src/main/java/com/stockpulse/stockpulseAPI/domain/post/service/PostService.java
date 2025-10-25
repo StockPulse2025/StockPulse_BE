@@ -148,6 +148,20 @@ public class PostService {
     }
 
     @Transactional
+    public void deletePosts(PostRequestDto.DeletePostDTO deletePostDto, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        List<Post> deleteTargetPosts = postRepository.findAllById(deletePostDto.getPostIds());
+
+        List<Post> postsToDelete = deleteTargetPosts.stream()
+                .filter(post -> post.getMember().equals(member))
+                .toList();
+
+        postRepository.deleteAll(postsToDelete);
+    }
+
+    @Transactional
     public Long createPost(Long userId, PostRequestDto dto) {
 
         Member member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("Member not found")); // TODO : 커스텀 Exception 추가 필요

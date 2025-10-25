@@ -104,6 +104,18 @@ public class PostController {
                 .body(ApiResponse.onSuccess(Map.of("postId", postId))); // ← 바디는 통일된 구조
     }
 
+    // 게시글 삭제
+    @DeleteMapping("/delete")
+    @Operation(
+            summary = "게시글 삭제",
+            description = "삭제할 게시물들의 ID를 전달해주세요. 본인이 작성한 게시글이 아니라면 삭제가 불가능합니다.")
+    public ApiResponse<String> deletePosts(
+            @RequestBody PostRequestDto.DeletePostDTO deleteTargetPosts,
+            @AuthUser Long memberId) {
+        postService.deletePosts(deleteTargetPosts,memberId);
+        return ApiResponse.onSuccess("게시글 삭제가 완료 되었습니다.");
+    }
+
     // 댓글 등록
     @PostMapping("/comment/{postId}")
     @Operation(summary = "댓글 등록", description = "댓글을 등록합니다.")
