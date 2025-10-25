@@ -108,13 +108,7 @@ public class PostResponseDTO {
         private String press;
         private boolean isNewsScrapped;
 
-        private Long stockId;
-        private String stockImageUrl;
-        private String stockName;
-        private Integer stockPrice;
-        private Float stockChangeRate;
-        private boolean isStockOwned;
-        private boolean isStockFavorite;
+        private StockResponseDTO.StockDetailDTO stockDetail;
 
         private VoteDTO voteSummary;
 

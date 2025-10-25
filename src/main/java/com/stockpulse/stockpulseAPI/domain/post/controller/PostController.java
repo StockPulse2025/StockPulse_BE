@@ -135,11 +135,12 @@ public class PostController {
     // TODO : 게시글 상세 조회
     @GetMapping("/{postId}")
     @Operation(summary = "게시글 상세 조회", description = "게시글 단건을 상세 조회합니다.")
-    public ResponseEntity<ApiResponse<PostResponseDTO.DetailDTO>> detail(@AuthUser Long userId, @PathVariable Long postId) {
+    public ApiResponse<PostResponseDTO.DetailDTO> detail(
+            @AuthUser Long userId, @PathVariable("postId") Long postId) {
+
         PostResponseDTO.DetailDTO response = postService.getPostDetail(userId, postId);
 
-        return ResponseEntity.ok()
-                .body(ApiResponse.onSuccess(response));
+        return ApiResponse.onSuccess(response);
     }
 
 

@@ -229,13 +229,13 @@ public class PostService {
                 .press(post.getNews().getPress())
                 .isNewsScrapped(member.getMemberScrapNewsList().contains(post.getNews()))
                 .newsImageUrl(post.getNews().getImage())
-                .stockId(post.getStock().getId())
-                .stockName(post.getStock().getName())
-                // .stockPrice(post.getStock().getPrice())
-                // .stockChangeRate(post.getStock().getChangeRate())
-                .stockImageUrl(post.getStock().getImageUrl())
-                .isStockOwned(member.getMemberOwnStockList().contains(post.getStock()))
-                .isStockFavorite(member.getMemberFavoriteStockList().contains(post.getStock()))
+                .stockDetail(
+                        createStockDetailDTO(
+                        post.getStock(),
+                        getStockDataFromRedis(post.getStock().getSymbol()),
+                        memberFavoriteStockRepository.existsByMemberAndStock(member, post.getStock()),
+                        memberOwnStockRepository.existsByMemberAndStock(member, post.getStock())
+                ))
                 .voteSummary(PostResponseDTO.VoteDTO.builder()
                         .postId(post.getId())
                         .buy(post.getVote().getBuy())
