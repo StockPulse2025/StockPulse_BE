@@ -1,6 +1,7 @@
 package com.stockpulse.stockpulseAPI.domain.post.dto;
 
 import com.stockpulse.stockpulseAPI.domain.post.entity.Post;
+import com.stockpulse.stockpulseAPI.domain.post.entity.enums.VoteOption;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import lombok.*;
 
@@ -21,7 +22,7 @@ public class PostResponseDTO {
         private String author;
         private Integer commentCount;
 
-        private boolean has_voted;
+        private boolean voteExists;
         private Integer voteCount;
 
         private String newsImageUrl;
@@ -124,10 +125,19 @@ public class PostResponseDTO {
     @Getter
     public static class VoteDTO {
         private Long postId;
+
+        // 투표 존재 여부
+        private boolean voteExists;
+
         private Long buy;
         private Long sell;
         private Long hold;
         private Long total;
+
+        // 내가 투표했는지 여부
+        private boolean voted;
+        // 내가 투표한 옵션
+        private VoteOption myVoteOption;
     }
 
     @Builder
