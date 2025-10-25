@@ -87,6 +87,7 @@ public class PostService {
                         .createdAt(post.getCreatedAt().toString())
                         .author(post.getMember().getNickname())
                         .commentCount(post.getCommentCount())
+                        .has_voted(voteRepository.existsByPost(post))
                         .voteCount(post.getVoteCount())
 
                         .newsImageUrl(post.getNews().getImage())

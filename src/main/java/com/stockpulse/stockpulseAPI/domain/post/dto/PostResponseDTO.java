@@ -20,6 +20,8 @@ public class PostResponseDTO {
         private String createdAt;
         private String author;
         private Integer commentCount;
+
+        private boolean has_voted;
         private Integer voteCount;
 
         private String newsImageUrl;
