@@ -133,9 +133,9 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostResponseDTO.CommentDTO>> comment(
             @AuthUser Long userId,
             @PathVariable("postId") Long postId,
-            @RequestBody String content
-    ) {
-        PostResponseDTO.CommentDTO response = postService.createComment(userId, postId, content);
+            @RequestBody PostRequestDto.CreateCommentDTO dto
+            ) {
+        PostResponseDTO.CommentDTO response = postService.createComment(userId, postId, dto.getContent());
 
         return ResponseEntity
                 .created(URI.create("/api/post/" + postId))
