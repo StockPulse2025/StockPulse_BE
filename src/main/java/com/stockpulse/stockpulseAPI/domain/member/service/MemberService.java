@@ -109,11 +109,12 @@ public class MemberService {
                 .collect(Collectors.toList());
     }
 
-    public List<PostResponseDTO.MemberPostPreviewDTO> getCommentedPosts(Long userId) {
+    public List<PostResponseDTO.MemberCommentPostPreviewDTO> getCommentedPosts(Long userId) {
         List<Comment> comments = memberRepository.findPostsCommentedByUserId(userId);
+
         return comments.stream()
-                .map(Comment::getPost)
-                .map(PostResponseDTO.MemberPostPreviewDTO::from)
+                .map(comment -> PostResponseDTO.MemberCommentPostPreviewDTO
+                        .from(comment.getPost(), comment))
                 .collect(Collectors.toList());
     }
 

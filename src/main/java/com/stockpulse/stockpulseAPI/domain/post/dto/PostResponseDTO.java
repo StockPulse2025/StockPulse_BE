@@ -1,5 +1,6 @@
 package com.stockpulse.stockpulseAPI.domain.post.dto;
 
+import com.stockpulse.stockpulseAPI.domain.post.entity.Comment;
 import com.stockpulse.stockpulseAPI.domain.post.entity.Post;
 import com.stockpulse.stockpulseAPI.domain.post.entity.enums.VoteOption;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
@@ -89,6 +90,48 @@ public class PostResponseDTO {
                     .newsTitle(post.getNews().getTitle())
                     .newsPublishedDate(post.getNews().getPublishedDate().toString())
                     .newsPublisher(post.getNews().getPress())
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MemberCommentPostPreviewDTO{
+        private Long postId;
+        private String title;
+        private String contentSummary;
+        private String createdAt;
+        private String author;
+        private Integer commentCount;
+        private Integer voteCount;
+
+        private String newsImageUrl;
+        private String newsTitle;
+        private String newsPublishedDate;
+        private String newsPublisher;
+
+        private Long commentId;
+
+        public static MemberCommentPostPreviewDTO from(Post post, Comment comment) {
+            String summary = post.getContent().length() <= 40 ?
+                    post.getContent() :
+                    post.getContent().substring(0, 40) + "...";
+
+            return MemberCommentPostPreviewDTO.builder()
+                    .postId(post.getId())
+                    .title(post.getTitle())
+                    .contentSummary(summary)
+                    .createdAt(post.getCreatedAt().toString())
+                    .author(post.getMember().getNickname())
+                    .commentCount(post.getCommentCount())
+                    .voteCount(post.getVoteCount())
+                    .newsImageUrl(post.getNews().getImage())
+                    .newsTitle(post.getNews().getTitle())
+                    .newsPublishedDate(post.getNews().getPublishedDate().toString())
+                    .newsPublisher(post.getNews().getPress())
+                    .commentId(comment.getId())
                     .build();
         }
     }
