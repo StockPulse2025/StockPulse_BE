@@ -132,6 +132,20 @@ public class StockResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class StockSimpleDTO{
+        private Long stockId;
+        private String stockName;
+        private String symbol;
+        private String imageUrl;
+
+        private BigDecimal currentPrice;
+        private BigDecimal changeRate;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MyStockInfluenceResponse{
         private Long stockId;
         private String stockName;

@@ -33,4 +33,5 @@ public interface MemberFavoriteStockRepository extends JpaRepository<MemberFavor
     @Query("SELECT mfs.stock FROM MemberFavoriteStock mfs WHERE mfs.member = :member")
     List<Stock> findStocksByMember(@Param("member") Member member);
 
+    List<MemberFavoriteStock> findByMemberId(Long memberId);
 }

@@ -1,6 +1,7 @@
 package com.stockpulse.stockpulseAPI.domain.stock.repository;
 
 import com.stockpulse.stockpulseAPI.domain.member.entity.Member;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberFavoriteStock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberOwnStock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,8 @@ public interface MemberOwnStockRepository extends JpaRepository<MemberOwnStock, 
     
     @Query("SELECT mos.stock FROM MemberOwnStock mos WHERE mos.member = :member")
     List<Stock> findStocksByMember(@Param("member") Member member);
+
+    List<MemberOwnStock> findByMemberId(Long memberId);
+
+    Long member(Member member);
 }
