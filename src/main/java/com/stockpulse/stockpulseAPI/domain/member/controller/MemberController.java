@@ -4,6 +4,7 @@ import com.stockpulse.stockpulseAPI.domain.member.dto.MemberRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.member.service.MemberService;
 import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
 import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -90,6 +91,17 @@ public class MemberController {
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(response)
         );
+    }
+
+    @Operation(
+            summary = "사용자 관심/보유 종목 조회",
+            description = "관심종목(FAVORITE), 보유종목(OWN): 해당하는 모든 종목들의 결과를 반환합니다."
+    )
+    @GetMapping("/stock")
+    public ApiResponse<List<StockResponseDTO.StockSimpleDTO>> getUserStocks(
+            @AuthUser Long userId,
+            @RequestParam("type") String type) {
+        return ApiResponse.onSuccess(memberService.getUserStocks(userId, type));
     }
 }
 

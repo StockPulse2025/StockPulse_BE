@@ -6,6 +6,7 @@ import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.StockTick;
 
+import java.lang.reflect.Member;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -195,6 +196,18 @@ public class StockConverter {
                 .changeAmount(BigDecimal.ZERO)
                 .predictInfluenceScore(maxImpactRate)
                 .relatedIssueCount(newsCount)
+                .build();
+    }
+
+    public static StockResponseDTO.StockSimpleDTO toStockSimpleDTO(
+            Stock stock, BigDecimal currentPrice, BigDecimal changeRate) {
+        return StockResponseDTO.StockSimpleDTO.builder()
+                .stockId(stock.getId())
+                .stockName(stock.getName())
+                .symbol(stock.getSymbol())
+                .imageUrl(stock.getImageUrl())
+                .currentPrice(currentPrice)
+                .changeRate(changeRate)
                 .build();
     }
 }
