@@ -86,8 +86,8 @@ public class MemberController {
 
     @Operation(summary = "사용자가 댓글 단 게시물  조회")
     @GetMapping("/post/comment")
-    public ResponseEntity<ApiResponse<List<PostResponseDTO.MemberPostPreviewDTO>>> getCommentedPosts(@AuthUser Long userId) {
-        List<PostResponseDTO.MemberPostPreviewDTO> response = memberService.getCommentedPosts(userId);
+    public ResponseEntity<ApiResponse<List<PostResponseDTO.MemberCommentPostPreviewDTO>>> getCommentedPosts(@AuthUser Long userId) {
+        List<PostResponseDTO.MemberCommentPostPreviewDTO> response = memberService.getCommentedPosts(userId);
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(response)
         );
