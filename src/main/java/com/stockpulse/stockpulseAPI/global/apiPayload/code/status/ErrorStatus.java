@@ -46,6 +46,9 @@ public enum ErrorStatus implements BaseErrorCode {
     NEWS_NOT_FOUND(HttpStatus.NOT_FOUND, "NEWS_001", "존재하지 않는 뉴스입니다."),
     NEWS_CONTENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "NEWS_002", "뉴스 본문이 존재하지 않습니다."),
     GEMINI_NOT_WORK(HttpStatus.INTERNAL_SERVER_ERROR, "NEWS_003", "AI 요약 서비스에 오류가 발생했습니다."),
+
+    // Post 관련
+    DUPLICATE_VOTE(HttpStatus.BAD_REQUEST, "POST_001", "이미 해당 게시글에 투표했습니다."),
     ;
 
     private final HttpStatus httpStatus;

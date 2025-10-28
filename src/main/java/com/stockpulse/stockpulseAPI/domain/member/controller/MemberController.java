@@ -4,6 +4,7 @@ import com.stockpulse.stockpulseAPI.domain.member.dto.MemberRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.member.service.MemberService;
 import com.stockpulse.stockpulseAPI.domain.news.dto.NewsResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
 import com.stockpulse.stockpulseAPI.global.apiPayload.ApiResponse;
 import com.stockpulse.stockpulseAPI.global.security.handler.annotation.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,6 +65,7 @@ public class MemberController {
         );
     }
 
+    @Operation(summary = "사용자 스크랩 뉴스 조회")
     @GetMapping("/news/scrap")
     public ResponseEntity<ApiResponse<List<NewsResponseDTO.NewsOverviewDTO>>> getScrapNews(@AuthUser Long userId) {
         List<NewsResponseDTO.NewsOverviewDTO> response = memberService.getScrapNews(userId);
@@ -72,21 +74,34 @@ public class MemberController {
         );
     }
 
+    @Operation(summary = "사용자 작성 게시글 조회")
     @GetMapping("/post/publish")
-    public ResponseEntity<ApiResponse<List<PostResponseDTO.SummaryDTO>>> getPublishedPosts(@AuthUser Long userId) {
-        List<PostResponseDTO.SummaryDTO> response = memberService.getPublishedPosts(userId);
+    public ResponseEntity<ApiResponse<List<PostResponseDTO.MemberPostPreviewDTO>>> getPublishedPosts(@AuthUser Long userId) {
+        List<PostResponseDTO.MemberPostPreviewDTO> response = memberService.getPublishedPosts(userId);
 
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(response)
         );
     }
 
+    @Operation(summary = "사용자가 댓글 단 게시물  조회")
     @GetMapping("/post/comment")
-    public ResponseEntity<ApiResponse<List<PostResponseDTO.SummaryDTO>>> getCommentedPosts(@AuthUser Long userId) {
-        List<PostResponseDTO.SummaryDTO> response = memberService.getCommentedPosts(userId);
+    public ResponseEntity<ApiResponse<List<PostResponseDTO.MemberCommentPostPreviewDTO>>> getCommentedPosts(@AuthUser Long userId) {
+        List<PostResponseDTO.MemberCommentPostPreviewDTO> response = memberService.getCommentedPosts(userId);
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(response)
         );
+    }
+
+    @Operation(
+            summary = "사용자 관심/보유 종목 조회",
+            description = "관심종목(FAVORITE), 보유종목(OWN): 해당하는 모든 종목들의 결과를 반환합니다."
+    )
+    @GetMapping("/stock")
+    public ApiResponse<List<StockResponseDTO.StockSimpleDTO>> getUserStocks(
+            @AuthUser Long userId,
+            @RequestParam("type") String type) {
+        return ApiResponse.onSuccess(memberService.getUserStocks(userId, type));
     }
 }
 

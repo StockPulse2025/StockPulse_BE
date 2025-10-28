@@ -40,12 +40,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Post> findPostsWithDetailByUserId(@Param("userId") Long userId);
 
     @Query("""
-            SELECT c
-            FROM Comment c
-            JOIN FETCH c.post p
-            JOIN FETCH p.member m
-            WHERE c.member.id = :userId
-            ORDER BY c.createdAt DESC
-    """)
-    List<Comment> findPostsCommentedByUserId(Long userId);
+           SELECT c
+           FROM Comment c
+           JOIN FETCH c.post p
+           JOIN FETCH p.member m
+           WHERE c.member.id = :userId
+           ORDER BY c.createdAt DESC
+""")
+    List<Comment> findPostsCommentedByUserId(@Param("userId") Long userId);
+
 }

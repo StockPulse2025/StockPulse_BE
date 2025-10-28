@@ -31,7 +31,6 @@ public class PostController {
 
     private final PostService postService;
 
-
     // TODO : 게시글 목록 조회
     @Operation(summary = "게시글 목록 조회", description = "게시글 목록을 조회합니다.")
     @GetMapping("/list")
@@ -46,8 +45,9 @@ public class PostController {
                             @ExampleObject(name = "댓글순", value = "comment", summary = "댓글 많은 순"),
                             @ExampleObject(name = "최신순", value = "latest", summary = "최신 작성 순")
                     })
-            @RequestParam("sort") String sort) {
-        List<PostResponseDTO.SummaryDTO> posts = postService.getPostList(page, size, sort);
+            @RequestParam("sort") String sort,
+            @AuthUser Long memberId) {
+        List<PostResponseDTO.SummaryDTO> posts = postService.getPostList(page, size, sort, memberId);
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.onSuccess(posts));
@@ -89,12 +89,6 @@ public class PostController {
                     schema = @Schema(implementation = PostRequestDto.class),
                     examples = @ExampleObject(value = "{\"newsId\": 13, \"title\": \"새로운 게시글 제목\", \"content\": \"게시글 내용입니다...\", \"stockId\": \"13\", \"requireVote\": true}")
             )))
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "댓글 성공적으로 등록됨",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostResponseDTO.CommentDTO.class),
-                            examples = @ExampleObject(value = "{\"isSuccess\":true,\"code\":\"201\",\"message\":\"Created\",\"result\":{\"postId\":101}}"))),
-    })
     @PostMapping("/write")
     public ResponseEntity<ApiResponse<Map<String,Long>>> write(
             @AuthUser Long userId,
@@ -109,15 +103,39 @@ public class PostController {
                 .body(ApiResponse.onSuccess(Map.of("postId", postId))); // ← 바디는 통일된 구조
     }
 
+    // 게시글 삭제
+    @DeleteMapping("/post/delete")
+    @Operation(
+            summary = "게시글 삭제",
+            description = "삭제할 게시물들의 ID를 전달해주세요. 본인이 작성한 게시글이 아니라면 삭제가 불가능합니다.")
+    public ApiResponse<String> deletePosts(
+            @RequestBody PostRequestDto.DeletePostDTO deleteTargetPosts,
+            @AuthUser Long memberId) {
+        postService.deletePosts(deleteTargetPosts,memberId);
+        return ApiResponse.onSuccess("게시글 삭제가 완료 되었습니다.");
+    }
+
+    // 댓글 삭제
+    @DeleteMapping("/comment/delete")
+    @Operation(
+            summary = "댓글 삭제",
+            description = "삭제할 댓글들의 ID를 전달해주세요. 본인이 작성한 댓글이 아니라면 삭제가 불가능합니다.")
+    public ApiResponse<String> deleteComments(
+            @RequestBody PostRequestDto.DeleteCommentDTO deleteTargetComments,
+            @AuthUser Long memberId) {
+        postService.deleteComments(deleteTargetComments,memberId);
+        return ApiResponse.onSuccess("댓글 삭제가 완료 되었습니다.");
+    }
+
     // 댓글 등록
     @PostMapping("/comment/{postId}")
     @Operation(summary = "댓글 등록", description = "댓글을 등록합니다.")
     public ResponseEntity<ApiResponse<PostResponseDTO.CommentDTO>> comment(
             @AuthUser Long userId,
-            @PathVariable Long postId,
-            @RequestBody String content
-    ) {
-        PostResponseDTO.CommentDTO response = postService.createComment(userId, postId, content);
+            @PathVariable("postId") Long postId,
+            @RequestBody PostRequestDto.CreateCommentDTO dto
+            ) {
+        PostResponseDTO.CommentDTO response = postService.createComment(userId, postId, dto.getContent());
 
         return ResponseEntity
                 .created(URI.create("/api/post/" + postId))
@@ -128,11 +146,12 @@ public class PostController {
     // TODO : 게시글 상세 조회
     @GetMapping("/{postId}")
     @Operation(summary = "게시글 상세 조회", description = "게시글 단건을 상세 조회합니다.")
-    public ResponseEntity<ApiResponse<PostResponseDTO.DetailDTO>> detail(@AuthUser Long userId, @PathVariable Long postId) {
+    public ApiResponse<PostResponseDTO.DetailDTO> detail(
+            @AuthUser Long userId, @PathVariable("postId") Long postId) {
+
         PostResponseDTO.DetailDTO response = postService.getPostDetail(userId, postId);
 
-        return ResponseEntity.ok()
-                .body(ApiResponse.onSuccess(response));
+        return ApiResponse.onSuccess(response);
     }
 
 
@@ -190,8 +209,8 @@ public class PostController {
             }
     )
     public ResponseEntity<ApiResponse<PostResponseDTO.VoteDTO>> vote(
-            @AuthUser long userId,
-            @PathVariable long postId,
+            @AuthUser Long userId,
+            @PathVariable("postId") Long postId,
             @RequestBody PostRequestDto.VoteParticipationDTO voteParticipationDTO) {
         PostResponseDTO.VoteDTO response = postService.vote(userId, postId, voteParticipationDTO);
         return ResponseEntity

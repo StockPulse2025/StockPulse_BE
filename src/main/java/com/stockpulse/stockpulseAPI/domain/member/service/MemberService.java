@@ -14,14 +14,25 @@ import com.stockpulse.stockpulseAPI.domain.news.repository.MemberScrapNewsReposi
 import com.stockpulse.stockpulseAPI.domain.post.dto.PostResponseDTO;
 import com.stockpulse.stockpulseAPI.domain.post.entity.Comment;
 import com.stockpulse.stockpulseAPI.domain.post.entity.Post;
+import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberFavoriteStock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.MemberOwnStock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
+import com.stockpulse.stockpulseAPI.domain.stock.entity.StockTick;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberFavoriteStockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.MemberOwnStockRepository;
+import com.stockpulse.stockpulseAPI.domain.stock.repository.StockTickRepository;
+import com.stockpulse.stockpulseAPI.global.apiPayload.code.status.ErrorStatus;
+import com.stockpulse.stockpulseAPI.global.apiPayload.exception.handler.MemberHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +40,11 @@ import java.util.stream.Collectors;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final ImpactRepository impactRepository;
+    private final RedisTemplate<String, String> redisTemplate;
     private final MemberScrapNewsRepository memberScrapNewsRepository;
+    private final MemberFavoriteStockRepository memberFavoriteStockRepository;
+    private final MemberOwnStockRepository memberOwnStockRepository;
+    private final StockTickRepository stockTickRepository;
 
     public String getNickname(Long userId) {
         return memberRepository.findById(userId)
@@ -86,20 +101,76 @@ public class MemberService {
                 .collect(Collectors.toList());
     }
 
-    public List<PostResponseDTO.SummaryDTO> getPublishedPosts(Long userId) {
+    public List<PostResponseDTO.MemberPostPreviewDTO> getPublishedPosts(Long userId) {
         List<Post> posts = memberRepository.findPostsWithDetailByUserId(userId);
 
         return posts.stream()
-                .map(PostResponseDTO.SummaryDTO::from)
+                .map(PostResponseDTO.MemberPostPreviewDTO::from)
                 .collect(Collectors.toList());
     }
 
-    public List<PostResponseDTO.SummaryDTO> getCommentedPosts(Long userId) {
+    public List<PostResponseDTO.MemberCommentPostPreviewDTO> getCommentedPosts(Long userId) {
         List<Comment> comments = memberRepository.findPostsCommentedByUserId(userId);
+
         return comments.stream()
-                .map(Comment::getPost)
-                .map(PostResponseDTO.SummaryDTO::from)
+                .map(comment -> PostResponseDTO.MemberCommentPostPreviewDTO
+                        .from(comment.getPost(), comment))
                 .collect(Collectors.toList());
+    }
+
+    public List<StockResponseDTO.StockSimpleDTO> getUserStocks(Long memberId, String type) {
+        List<Stock> stockList;
+        if (type.equals("OWN")) {
+            List<MemberOwnStock> memberOwnStocks = memberOwnStockRepository.findByMemberId(memberId);
+            stockList = memberOwnStocks.stream()
+                    .map(MemberOwnStock::getStock)
+                    .collect(Collectors.toList());
+        } else if (type.equals("FAVORITE")) {
+            List<MemberFavoriteStock> favoriteStocks = memberFavoriteStockRepository.findByMemberId(memberId);
+            stockList = favoriteStocks.stream()
+                    .map(MemberFavoriteStock::getStock)
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Invalid type: " + type);
+        }
+
+        List<StockResponseDTO.StockSimpleDTO> result = stockList.stream()
+                .map(stock -> {
+                    String stockSymbol = stock.getSymbol();
+                    List<String> redisValues = getStockDataFromRedis(stockSymbol);
+                    return createStockSimpleDTO(stock, redisValues);
+                })
+                .collect(Collectors.toList());
+        return result;
+    }
+
+    private List<String> getStockDataFromRedis(String stockSymbol) {
+        try {
+            String redisKey = "stock:tick:" + stockSymbol;
+            HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+            List<String> fields
+                    = Arrays.asList("closePrice", "changeRate", "changeAmount","tradingValue","tradingValue");
+            return hashOps.multiGet(redisKey, fields);
+        } catch (Exception e) {
+            // Redis 연결 실패, 타임아웃 등 모든 예외 상황에서 null 반환
+            return null;
+        }
+    }
+
+    private StockResponseDTO.StockSimpleDTO createStockSimpleDTO(Stock stock, List<String> redisValues) {
+        // Redis 캐시 미스 시 데이터베이스 fallback
+        if (redisValues == null || redisValues.stream().allMatch(Objects::isNull) ||
+                redisValues.stream().anyMatch(value -> value == null || value.trim().isEmpty())) {
+            Optional<StockTick> latestTick = stockTickRepository.findByStock(stock);
+            return StockConverter.toStockSimpleDTO(
+                    stock,
+                    latestTick.get().getClosePrice(),
+                    latestTick.get().getChangeRate());
+        }
+        return StockConverter.toStockSimpleDTO(
+                stock,
+                new BigDecimal(redisValues.get(0)),
+                new BigDecimal(redisValues.get(1)));
     }
 
     Sentiment parseSentiment(Impact impact) {
@@ -111,5 +182,4 @@ public class MemberService {
         }
         return Sentiment.NEUTRAL;
     }
-
 }
