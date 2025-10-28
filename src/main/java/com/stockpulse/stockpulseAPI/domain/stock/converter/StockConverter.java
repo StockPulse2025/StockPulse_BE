@@ -1,5 +1,6 @@
 package com.stockpulse.stockpulseAPI.domain.stock.converter;
 
+import com.stockpulse.stockpulseAPI.domain.stock.dto.MarketIndexResponse;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockHistoryResponse;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
 import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
@@ -195,6 +196,24 @@ public class StockConverter {
                 .changeAmount(BigDecimal.ZERO)
                 .predictInfluenceScore(maxImpactRate)
                 .relatedIssueCount(newsCount)
+                .build();
+    }
+
+    public static StockResponseDTO.IndexDTO toIndexDTO(MarketIndexResponse response) {
+        MarketIndexResponse.MarketIndexData data = response.getOutput();
+
+        return StockResponseDTO.IndexDTO.builder()
+                .currentPrice(new BigDecimal(data.getBstpNmixPrpr()))
+                .changeAmount(new BigDecimal(data.getBstpNmixPrdyVrss()))
+                .changeRate(new BigDecimal(data.getBstpNmixPrdyCtrt()))
+                .build();
+    }
+
+    public static StockResponseDTO.MarketIndexDTO toMarketIndexDTO(
+            StockResponseDTO.IndexDTO kospi, StockResponseDTO.IndexDTO kosdaq){
+        return StockResponseDTO.MarketIndexDTO.builder()
+                .Kospi(kospi)
+                .Kosdaq(kosdaq)
                 .build();
     }
 }

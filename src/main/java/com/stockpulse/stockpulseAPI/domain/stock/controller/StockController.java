@@ -155,4 +155,13 @@ public class StockController {
                 = stockQueryService.getMyStockInfluenceResponse(memberId, myStockType);
         return ApiResponse.onSuccess(response);
     }
+
+    @Operation(
+            summary = "주가 지수 조회 API",
+            description = "현재 주가 지수(현재가, 전일대비, 전일대비율)를 조회합니다.")
+    @GetMapping("/market/index")
+    public ApiResponse<StockResponseDTO.MarketIndexDTO> getStockIndex() {
+        StockResponseDTO.MarketIndexDTO result = stockQueryService.getMarketIndex();
+        return ApiResponse.onSuccess(result);
+    }
 }

@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.stockpulse.stockpulseAPI.domain.news.converter.NewsConverter.toNewsTimePointDTO;
+import static com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter.toMarketIndexDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -114,6 +115,13 @@ public class StockQueryService {
             Long stockId, StockRequestDTO.ChartPeriodType period){
         Stock stock = getStockById(stockId);
         return kisRestClient.getStockCandleListDTO(stock, period);
+    }
+
+    // 주가 지수 조회
+    public StockResponseDTO.MarketIndexDTO getMarketIndex(){
+        StockResponseDTO.IndexDTO kospi = kisRestClient.getMarketIndex("0001");
+        StockResponseDTO.IndexDTO kosdaq = kisRestClient.getMarketIndex("1001");
+        return toMarketIndexDTO(kospi,kosdaq);
     }
 
     // 종목 특정 시점별 뉴스 조회

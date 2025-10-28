@@ -132,6 +132,25 @@ public class StockResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class MarketIndexDTO{
+        private IndexDTO Kospi;
+        private IndexDTO Kosdaq;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class IndexDTO{
+        private BigDecimal currentPrice;
+        private BigDecimal changeAmount;
+        private BigDecimal changeRate;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MyStockInfluenceResponse{
         private Long stockId;
         private String stockName;

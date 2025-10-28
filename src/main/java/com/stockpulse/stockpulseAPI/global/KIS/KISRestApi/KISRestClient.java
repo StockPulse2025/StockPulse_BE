@@ -1,10 +1,7 @@
 package com.stockpulse.stockpulseAPI.global.KIS.KISRestApi;
 
 import com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter;
-import com.stockpulse.stockpulseAPI.domain.stock.dto.StockHistoryResponse;
-import com.stockpulse.stockpulseAPI.domain.stock.dto.StockRequestDTO;
-import com.stockpulse.stockpulseAPI.domain.stock.dto.StockResponseDTO;
-import com.stockpulse.stockpulseAPI.domain.stock.dto.TokenResponse;
+import com.stockpulse.stockpulseAPI.domain.stock.dto.*;
 import com.stockpulse.stockpulseAPI.domain.stock.entity.Stock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.stockpulse.stockpulseAPI.domain.stock.converter.StockConverter.toIndexDTO;
 
 @Component
 @RequiredArgsConstructor
@@ -42,6 +41,12 @@ public class KISRestClient {
         StockHistoryResponse response = callKISApiWithRetry(stock, dateRange, accessToken);
         
         return buildStockCandleListDTO(stock, period, response);
+    }
+
+    public StockResponseDTO.IndexDTO getMarketIndex(String trId){
+        String accessToken = getAccessTokenFromCache();
+        MarketIndexResponse marketIndexResponse = callKISApiWithRetry2(accessToken, trId);
+        return toIndexDTO(marketIndexResponse);
     }
     
     private DateRange calculateDateRange(StockRequestDTO.ChartPeriodType period) {
@@ -88,9 +93,18 @@ public class KISRestClient {
             return callKISApi(stock, dateRange, newToken);
         }
     }
+
+    private MarketIndexResponse callKISApiWithRetry2 (String accessToken, String trId) {
+        try {
+            return getMarketIndex(accessToken, trId);
+        } catch (Exception e) {
+            String newToken = getAuthorizationToken();
+            return getMarketIndex(newToken, trId);
+        }
+    }
     
     private StockHistoryResponse callKISApi(Stock stock, DateRange dateRange, String accessToken) {
-        WebClient webClient = createWebClient(accessToken);
+        WebClient webClient = createWebClient(accessToken, "FHKST03010100");
         
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -106,19 +120,35 @@ public class KISRestClient {
                 .bodyToMono(StockHistoryResponse.class)
                 .block();
     }
-    
-    private WebClient createWebClient(String accessToken) {
+
+    private MarketIndexResponse getMarketIndex(String accessToken, String FidInput) {
+        WebClient webClient = createWebClient(accessToken, "FHPUP02100000");
+
+        MarketIndexResponse response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/uapi/domestic-stock/v1/quotations/inquire-index-price")
+                        .queryParam("FID_COND_MRKT_DIV_CODE", "U")
+                        .queryParam("FID_INPUT_ISCD", FidInput)
+                        .build())
+                .retrieve()
+                .bodyToMono(MarketIndexResponse.class)
+                .block();
+
+        return response;
+    }
+
+    private WebClient createWebClient(String accessToken, String trId) {
         return WebClient.builder()
                 .baseUrl(KIS_API_URL)
                 .defaultHeader("content-type", "application/json")
                 .defaultHeader("authorization", "Bearer " + accessToken)
                 .defaultHeader("appkey", appkey)
                 .defaultHeader("appsecret", appsecret)
-                .defaultHeader("tr_id", "FHKST03010100")
+                .defaultHeader("tr_id", trId)
                 .defaultHeader("custtype", "P")
                 .build();
     }
-    
+
     private StockResponseDTO.StockCandleListDTO buildStockCandleListDTO(Stock stock, StockRequestDTO.ChartPeriodType period, StockHistoryResponse response) {
         List<StockResponseDTO.StockCandleDTO> candleList = response.getOutput2().stream()
                 .map(StockConverter::toStockCandleListDTO)
