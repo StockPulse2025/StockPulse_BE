@@ -89,10 +89,10 @@ public class NewsQueryService {
     public NewsResponseDTO.NewsOverviewDTO getMainNews(Long memberId) {
 
         Pageable topOne = PageRequest.of(0,1);
-        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        LocalDateTime yesterdayStart = LocalDate.now().minusDays(1).atStartOfDay();
 
         List<Impact> topImpacts
-                = impactRepository.findTopByCreatedAtAfterOrderByImpactRateDescWithNews(todayStart, topOne);
+                = impactRepository.findTopByCreatedAtAfterOrderByImpactRateDescWithNews(yesterdayStart, topOne);
 
         Impact highestImpact = topImpacts.get(0);
         Stock highestImpactStock = highestImpact.getStock();

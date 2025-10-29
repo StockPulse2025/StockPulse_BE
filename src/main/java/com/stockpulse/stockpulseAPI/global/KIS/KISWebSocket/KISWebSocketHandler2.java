@@ -95,7 +95,7 @@ public class KISWebSocketHandler2 extends TextWebSocketHandler {
                 String MKSC_SHRN_ISCD = fields[startIdx];
                 String STCK_PRPR = fields[startIdx + 2];
                 String PRDY_CTRT = fields[startIdx + 5];
-                String WGHN_AVRG_STCK_PRC = fields[startIdx + 6];
+                String PRDY_VRSS = fields[startIdx + 4];
                 String STCK_OPRC = fields[startIdx + 7];
                 String STCK_HGPR = fields[startIdx + 8];
                 String STCK_LWPR = fields[startIdx + 9];
@@ -111,7 +111,7 @@ public class KISWebSocketHandler2 extends TextWebSocketHandler {
                 updateMap.put("tradingValue", ACML_TR_PBMN);
                 updateMap.put("tradingVolume", ACML_VOL);
                 updateMap.put("changeRate", PRDY_CTRT);
-                updateMap.put("changeAmount", WGHN_AVRG_STCK_PRC);
+                updateMap.put("changeAmount", PRDY_VRSS);
 
                 String stockKey = "stock:tick:" + MKSC_SHRN_ISCD;
                 redisTemplate.opsForHash().putAll(stockKey, updateMap);
@@ -121,7 +121,7 @@ public class KISWebSocketHandler2 extends TextWebSocketHandler {
                         .symbol(MKSC_SHRN_ISCD)
                         .currentPrice(new BigDecimal(STCK_PRPR))
                         .changeRate(new BigDecimal(PRDY_CTRT))
-                        .changeAmount(new BigDecimal(WGHN_AVRG_STCK_PRC))
+                        .changeAmount(new BigDecimal(PRDY_VRSS))
                         .build();
 
                 messagingTemplate.convertAndSend("/sub/" + MKSC_SHRN_ISCD, stockData);
